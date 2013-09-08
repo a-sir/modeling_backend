@@ -5,16 +5,33 @@ import scala.collection.{mutable, SortedMap}
 import wordforms._
 import java.util
 import java.net.{URLConnection, URL, JarURLConnection}
+import java.util.StringTokenizer
 
 /**
  * @author A.Sirenko
  *          Date: 9/8/13
  */
-class Lemmatizer(val lemmaToWfs: Map[String, List[String]], val wfToLemmas: Map[String, List[String]]) {
+class Lemmatizer(val lemmaToWfs: Map[String, List[String]], val wfToLemmas: Map[String,List[String]]) {
 
 	@NotNull def getLemmas(@NotNull wordform: String): Option[List[String]] = wfToLemmas.get(wordform)
 
-	@Nullable def getWordforms(@NotNull lemma: String): Option[List[String]] = lemmaToWfs.get(lemma)
+	@NotNull def getWordforms(@NotNull lemma: String): Option[List[String]] = lemmaToWfs.get(lemma)
+
+	def tokenizeAndLemmatize(sentence: String, keepUnknownTokens: Boolean): List[String] = {
+		val tokens = Lemmatizer.tokenize(sentence)
+		var res: List[String] = List()
+		tokens.foreach((raw:String) => {
+			val lemmas = getLemmas(raw)
+			if (lemmas.isEmpty) {
+				if (keepUnknownTokens) {
+					res = res ::: List(raw)
+				}
+			} else if (lemmas.get.length == 1) {
+				res = res ::: List(lemmas.get(0))
+			}
+		})
+		res
+	}
 
 }
 
@@ -31,7 +48,7 @@ object Lemmatizer {
 			var wfs: List[String] =  List(l.getName)
 			val iter = l.getWordforms.iterator()
 			while (iter.hasNext) {
-				wfs = iter.next().getName :: wfs
+				wfs = (iter.next().getName :: wfs).distinct
 			}
 
 			if (lemmaToWfs.contains(l.getName)) {
@@ -40,7 +57,7 @@ object Lemmatizer {
 			lemmaToWfs = lemmaToWfs.updated(l.getName, wfs.distinct)
 			for (wf <- wfs) {
 				if (wfToLemmas.contains(wf)) {
-					wfToLemmas = wfToLemmas.updated(wf, (l.getName :: wfToLemmas.get(wf).get).distinct)
+					wfToLemmas = wfToLemmas.updated(wf, l.getName :: wfToLemmas.get(wf).get)
 				} else {
 					wfToLemmas = wfToLemmas.updated(wf, List(l.getName))
 				}
@@ -49,4 +66,14 @@ object Lemmatizer {
 
 		new Lemmatizer(lemmaToWfs, wfToLemmas)
 	}
+
+	def tokenize(sentence: String): List[String] = {
+		val t = new StringTokenizer(sentence, "\\t;: .,?!\\'\\\"")
+		var res: List[String] = List()
+		while(t.hasMoreTokens) {
+			res = res ::: List(t.nextToken())
+		}
+		res
+	}
+
 }

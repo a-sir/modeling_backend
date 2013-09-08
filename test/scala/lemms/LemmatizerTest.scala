@@ -24,6 +24,17 @@ class LemmatizerTest extends FunSpec {
 			assert(lemmatizer.getWordforms("apple").get == List("apples", "apple"))
 		}
 
+		it("should consider several delimeters") {
+			assert(Lemmatizer.tokenize("abra cadabra,'really':fun") == List("abra", "cadabra", "really", "fun"))
+		}
+
+		it("should be able to prepare lemmatized tokens") {
+			var keepUnknown = true
+			assert(lemmatizer.tokenizeAndLemmatize("apples,; cadabra", keepUnknown) == List("apple", "cadabra"))
+			keepUnknown = false
+			assert(lemmatizer.tokenizeAndLemmatize("apples,; cadabra", keepUnknown) == List("apple"))
+		}
+
 	}
 
 }
