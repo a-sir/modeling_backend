@@ -2,6 +2,8 @@ package grammar
 
 import assoc_net.{Connection, AssociativeNet}
 import lemms.{Lemmatizer}
+import synsets.{Loader, Synsets}
+import java.nio.file.Paths
 
 /**
  * @author A.Sirenko
@@ -23,7 +25,7 @@ class Grammar(
 
 object Grammar {
 
-	def create(assoc: AssociativeNet, lemmatizer: Lemmatizer): Grammar = {
+	def create(assoc: AssociativeNet, lemmatizer: Lemmatizer) {
 		val syms = new SymbolsMutable
 		val rules = new RulesMutable
 
@@ -52,6 +54,21 @@ object Grammar {
 			}
 		}
 
-		new Grammar(syms, rules)
+		// synsets
+		val syns: Synsets = Loader.read(Paths.get("data/princeton_wp_synsets"))
+		var i = 0
+		var synsetMap: Map[Symbol, List[List[Symbol]]] = Map()
+		for (i <- 0 to (syns.size() - 1)) {
+            val synsetSymbols = util.Collections.toList(syns.getSynset(i))
+					.foldLeft(List[Symbol]())((x, y) => x ::: List(syms.getOrCreateSymbol(y)))
+			for (s <- synsetSymbols) {
+				val curr = synsetMap.get(s)
+				if (curr == Option.empty) {
+					synsetMap = synsetMap + (s -> List(synsetSymbols))
+				} else {
+					synsetMap = synsetMap.updated(s, curr.get ::: List(synsetSymbols))
+				}
+			}
+		}
 	}
 }
