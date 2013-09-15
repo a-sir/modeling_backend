@@ -3,6 +3,7 @@ package import_ling
 import java.util.zip.GZIPInputStream
 import java.io._
 import cognems.Cognem
+import util.StringUtils._
 
 /**
  * @author A.Sirenko
@@ -58,5 +59,14 @@ object CognemReader {
 			}
 		}
 		throw new RuntimeException("Missed EOF")
+	}
+
+	def filterCognemsByChars(cognems: List[Cognem]): List[Cognem] = {
+		cognems.filter(
+			(c) =>
+					isStandartEngText(c.name)
+					&& isStandartEngText(c.sense)
+		)
+
 	}
 }
