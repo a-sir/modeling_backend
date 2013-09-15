@@ -32,4 +32,5 @@ class SymbolsMutable {
 	def getOrCreateSymbols(tokens: List[String]): List[Symbol] =
 		tokens.foldRight(List[Symbol]())((b,a) => a ::: List(getOrCreateSymbol(b)))
 
+	def size = keyToSymbol.size
 }

@@ -1,33 +1,46 @@
 package grammar
 
 import assoc_net.{Connection, AssociativeNet}
-import lemms.{Lemmatizer}
+import lemms.Lemmatizer
 import synsets.{Loader, Synsets}
 import java.nio.file.Paths
+import import_ling.CognemReader
 
 /**
  * @author A.Sirenko
  *          Date: 9/8/13
  */
 class Grammar(
-		val syms: SymbolsMutable, val rules: RulesMutable) {
+		val syms: SymbolsMutable,
+		val assocRules: RulesMutable,
+		val cognRules: CognitiveRulesImmutable,
+		var synsetMap: Map[Symbol, List[List[Symbol]]]) {
 
 	def getSymbol(name: String) = syms.getSymbol(name)
 
-	def getRulesByLeft(left: Symbol): Option[List[Rule]] = rules.getByLeft(left)
+	def getAssocRulesByLeft(left: Symbol) = assocRules.getByLeft(left)
 
-	def getRulesByRight(right: Symbol): Option[List[Rule]] = rules.getByRight(right)
+	def getAssocRulesByRight(right: Symbol) = assocRules.getByRight(right)
 
-	override def toString = "Grammar with " + rules.rulesCount + " rules"
+	def getCognRulesByLeft(left: Symbol) = cognRules.rulesBySign.get(left)
 
-	def getRulesCount = rules.rulesCount
+	def getCognRulesByRight(right: Symbol) = cognRules.rulesBySense.get(right)
+
+	override def toString = "Grammar with " + assocRules.rulesCount + " rules"
+
+	def getAssocRulesCount = assocRules.rulesCount
+	def getCognRulesCount = cognRules.size
+	def getSynsetsCount = synsetMap.foldLeft(0)((a, b) => a + b._2.length)
+	def countOfSyms = syms.size
 }
 
 object Grammar {
 
-	def create(assoc: AssociativeNet, lemmatizer: Lemmatizer) {
+	def create(assoc: AssociativeNet, lemmatizer: Lemmatizer): Grammar = {
 		val syms = new SymbolsMutable
 		val rules = new RulesMutable
+
+		val keepUnknownWordforms = true
 
 		// Assume assoc
 		for (stim: String <- util.Collections.toList(assoc.getStims)) {
@@ -36,14 +49,14 @@ object Grammar {
 			for (conn: Connection <- conns) {
 				total += conn.getCount
 			}
-			val keepUnknownTokens = true
+
 			val lemStimSymbols = syms.getOrCreateSymbols(
-				lemmatizer.tokenizeAndLemmatize(stim, keepUnknownTokens)
+				lemmatizer.tokenizeAndLemmatize(stim, keepUnknownWordforms)
 			)
 			if (!lemStimSymbols.isEmpty) {
 				for (conn: Connection <- conns) {
 					val lemReakSymbols = syms.getOrCreateSymbols(
-						lemmatizer.tokenizeAndLemmatize(conn.getReak, keepUnknownTokens)
+						lemmatizer.tokenizeAndLemmatize(conn.getReak, keepUnknownWordforms)
 					)
 					if (!lemReakSymbols.isEmpty) {
 						val count = conn.getCount
@@ -70,8 +83,13 @@ object Grammar {
 				}
 			}
 		}
-		// TODO add cognems to Grammar
-		Nil
-
+		val cognRules = new CognitiveRulesMutable
+		for (cogn <- CognemReader.filterCognemsByChars(CognemReader.defaultSet)) {
+			val left = syms.getOrCreateSymbols(lemmatizer.tokenizeAndLemmatize(cogn.name, keepUnknownWordforms))
+			val right = syms.getOrCreateSymbols(lemmatizer.tokenizeAndLemmatize(cogn.sense, keepUnknownWordforms))
+			cognRules.addRule(new CognitiveRule(left, right, util.Collections.toList(cogn.context)))
+		}
+		new Grammar(syms, rules, cognRules.immutableInstance, synsetMap)
 	}
+
 }

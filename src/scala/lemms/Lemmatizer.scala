@@ -17,13 +17,14 @@ class Lemmatizer(val lemmaToWfs: Map[String, List[String]], val wfToLemmas: Map[
 
 	@NotNull def getWordforms(@NotNull lemma: String): Option[List[String]] = lemmaToWfs.get(lemma)
 
-	def tokenizeAndLemmatize(sentence: String, keepUnknownTokens: Boolean): List[String] = {
+	// TODO use for splitting additional set from StringUtils
+	def tokenizeAndLemmatize(sentence: String, keepUnknownWordforms: Boolean): List[String] = {
 		val tokens = Lemmatizer.tokenize(sentence)
 		var res: List[String] = List()
 		tokens.foreach((raw:String) => {
 			val lemmas = getLemmas(raw)
 			if (lemmas.isEmpty) {
-				if (keepUnknownTokens) {
+				if (keepUnknownWordforms) {
 					res = res ::: List(raw)
 				}
 			} else if (lemmas.get.length == 1) {

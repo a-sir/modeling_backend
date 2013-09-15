@@ -11,9 +11,12 @@ import lemms.Lemmatizer
 class GrammarTest extends FunSpec {
 	describe("A Grammar") {
 
-		it("should consist of N rules") {
+		it("should consist of associative, cognitive rules and synonims") {
 			val assocNet = AssociativeNet.loadDefaultNet()
-			val g = Grammar.create(assocNet, Lemmatizer.create())
+			val g: Grammar = Grammar.create(assocNet, Lemmatizer.create())
+			assert(g.getAssocRulesCount == 69405)
+			assert(g.getCognRulesCount == 740069)
+			assert(g.getSynsetsCount == 206978)
 		}
 
 	}

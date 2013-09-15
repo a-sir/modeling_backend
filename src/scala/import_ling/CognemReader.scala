@@ -13,7 +13,7 @@ object CognemReader {
 
 	val DEFAULT_WIKITIONARY_PARSED = "data/wikitionary.parsed.gz"
 
-	def readDefault(): List[Cognem] = read(DEFAULT_WIKITIONARY_PARSED)
+	lazy val defaultSet : List[Cognem] = read(DEFAULT_WIKITIONARY_PARSED)
 
 	def parse(lines: List[String]): List[Cognem] = {
 		if (!lines.head.startsWith("# ") || lines.length < 2) {
