@@ -14,7 +14,6 @@ class GrammarTest extends FunSpec {
 		it("should consist of N rules") {
 			val assocNet = AssociativeNet.loadDefaultNet()
 			val g = Grammar.create(assocNet, Lemmatizer.create())
-			assert(g.getRulesCount  > 65000)
 		}
 
 	}

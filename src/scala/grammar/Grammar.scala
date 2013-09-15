@@ -70,5 +70,8 @@ object Grammar {
 				}
 			}
 		}
+		// TODO add cognems to Grammar
+		Nil
+
 	}
 }
