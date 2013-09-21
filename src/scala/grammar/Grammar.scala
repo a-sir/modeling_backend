@@ -14,7 +14,7 @@ class Grammar(
 		val syms: SymbolsMutable,
 		val assocRules: RulesMutable,
 		val cognRules: CognitiveRulesImmutable,
-		var synsetMap: Map[Symbol, List[List[Symbol]]]) {
+		val synRules: RulesMutable) {
 
 	def getSymbol(name: String) = syms.getSymbol(name)
 
@@ -30,7 +30,7 @@ class Grammar(
 
 	def getAssocRulesCount = assocRules.rulesCount
 	def getCognRulesCount = cognRules.size
-	def getSynsetsCount = synsetMap.foldLeft(0)((a, b) => a + b._2.length)
+	def getSynRulesCount = synRules.rulesCount
 	def countOfSyms = syms.size
 }
 
@@ -67,29 +67,27 @@ object Grammar {
 			}
 		}
 
-		// synsets
-		val syns: Synsets = Loader.read(Paths.get("data/princeton_wp_synsets"))
-		var i = 0
-		var synsetMap: Map[Symbol, List[List[Symbol]]] = Map()
-		for (i <- 0 to (syns.size() - 1)) {
-            val synsetSymbols = util.Collections.toList(syns.getSynset(i))
-					.foldLeft(List[Symbol]())((x, y) => x ::: List(syms.getOrCreateSymbol(y)))
-			for (s <- synsetSymbols) {
-				val curr = synsetMap.get(s)
-				if (curr == Option.empty) {
-					synsetMap = synsetMap + (s -> List(synsetSymbols))
-				} else {
-					synsetMap = synsetMap.updated(s, curr.get ::: List(synsetSymbols))
-				}
-			}
-		}
 		val cognRules = new CognitiveRulesMutable
 		for (cogn <- CognemReader.filterCognemsByChars(CognemReader.defaultSet)) {
 			val left = syms.getOrCreateSymbols(lemmatizer.tokenizeAndLemmatize(cogn.name, keepUnknownWordforms))
 			val right = syms.getOrCreateSymbols(lemmatizer.tokenizeAndLemmatize(cogn.sense, keepUnknownWordforms))
 			cognRules.addRule(new CognitiveRule(left, right, util.Collections.toList(cogn.context)))
 		}
-		new Grammar(syms, rules, cognRules.immutableInstance, synsetMap)
+
+		// synsets
+		val rawSyns: Synsets = Loader.read(Paths.get("data/princeton_wp_synsets"))
+		val synRules = new RulesMutable
+		for (i <- 0 to (rawSyns.size() - 1)) {
+			val synsetSymbols = util.Collections.toList(rawSyns.getSynset(i))
+					.foldLeft(Set[Symbol]())((x, y) => x + syms.getOrCreateSymbol(y))
+			for (s1 <- synsetSymbols) {
+				for (s2 <- synsetSymbols.filter(_ != s1)) {
+					synRules.addRule(new Rule(List(s1), List(s2), 0.0))
+				}
+			}
+		}
+
+		new Grammar(syms, rules, cognRules.immutableInstance, synRules)
 	}
 
 }
