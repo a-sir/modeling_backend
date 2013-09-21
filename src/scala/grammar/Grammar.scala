@@ -16,17 +16,7 @@ class Grammar(
 		val cognRules: CognitiveRulesImmutable,
 		val synRules: RulesMutable) {
 
-	def getSymbol(name: String) = syms.getSymbol(name)
-
-	def getAssocRulesByLeft(left: Symbol) = assocRules.getByLeft(left)
-
-	def getAssocRulesByRight(right: Symbol) = assocRules.getByRight(right)
-
-	def getCognRulesByLeft(left: Symbol) = cognRules.rulesBySign.get(left)
-
-	def getCognRulesByRight(right: Symbol) = cognRules.rulesBySense.get(right)
-
-	override def toString = "Grammar with " + assocRules.rulesCount + " rules"
+	override def toString = "Grammar with " + assocRules.rulesCount + " assoc rules"
 
 	def getAssocRulesCount = assocRules.rulesCount
 	def getCognRulesCount = cognRules.size
