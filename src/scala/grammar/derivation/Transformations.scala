@@ -9,26 +9,30 @@ import grammar.{Symbol, Rule}
 
 case class CPoint(sentence: List[Symbol]) {
 
-	def apply(rule: AssocRule) = new CPoint(sentence.patch(rule.position, rule.right, rule.left.length))
+	def apply(rule: AssocTransform) = new CPoint(sentence.patch(rule.position, rule.right, rule.left.length))
 
-	def apply(rule: CognRule) = new CPoint(sentence.patch(rule.range._1, rule.right, rule.range._2))
+	def apply(rule: CognTransform) = new CPoint(sentence.patch(rule.range._1, rule.right, rule.range._2))
 
-	def apply(rule: SynRule) = new CPoint(sentence.patch(rule.position, rule.right, rule.left.length))
+	def apply(rule: SynTransform) = new CPoint(sentence.patch(rule.position, rule.right, rule.left.length))
 }
 
-case class AssocRule(leftSyms: List[Symbol], rightSyms: List[Symbol], costOfRule: Double, position: Int)
+case class AssocTransform(leftSyms: List[Symbol], rightSyms: List[Symbol], costOfRule: Double, position: Int)
 		extends Rule(leftSyms, rightSyms,costOfRule)
 
-case class CognRule(
+case class CognTransform(
 		leftSyms: List[Symbol], rightSyms: List[Symbol], costOfRule: Double, range: Pair[Int, Int], ops: String)
 		extends Rule(leftSyms, rightSyms,costOfRule)
 
-case class SynRule(leftSyms: List[Symbol], rightSyms: List[Symbol], position: Int)
+object CognTransform {
+	val DEFAULT_COST = 0.5
+}
+
+case class SynTransform(leftSyms: List[Symbol], rightSyms: List[Symbol], position: Int)
 		extends Rule(leftSyms, rightSyms, 0)
 
 class PosTrans(val rule: Rule, val child: CPoint)
 
 class AppliedTrans(
-		val reachedCost: Double, val parent: AppliedTrans,
+		val reachedCost: Double, val parent: Option[AppliedTrans],
 		val level: Int, val posTrans: PosTrans, val root: CPoint
 )
