@@ -29,10 +29,10 @@ class CognitiveRulesMutable {
 			rulesByContext.addBinding(ctx, rule)
 		}
 		for (leftSym <- rule.left) {
-			rulesBySign.addBinding(leftSym, rule)
+			rulesBySense.addBinding(leftSym, rule)
 		}
 		for (rightSym <- rule.right) {
-			rulesBySense.addBinding(rightSym, rule)
+			rulesBySign.addBinding(rightSym, rule)
 		}
 		rules = rule :: rules
 	}
