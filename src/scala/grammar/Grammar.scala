@@ -80,4 +80,35 @@ object Grammar {
 		new Grammar(syms, rules, cognRules.immutableInstance, synRules)
 	}
 
+	def createMock(): Grammar = {
+		val syms = new SymbolsMutable
+
+		val assocRules = new RulesMutable
+		assocRules.addRule(
+			new Rule(
+				syms.getOrCreateSymbols(List("a")),
+				syms.getOrCreateSymbols(List("b")), 0.5))
+		assocRules.addRule(
+			new Rule(
+				syms.getOrCreateSymbols(List("b")),
+				syms.getOrCreateSymbols(List("a", "b")), 0.3))
+
+		val cognRules = new CognitiveRulesMutable
+		cognRules.addRule(
+			new CognitiveRule(
+				syms.getOrCreateSymbols(List("a", "c")),
+				syms.getOrCreateSymbols(List("d")),
+				List("alphabet"))
+		)
+
+		val synRules = new RulesMutable
+		synRules.addRule(
+			new Rule(
+				syms.getOrCreateSymbols(List("c")),
+				syms.getOrCreateSymbols(List("d")), 0.0)
+		)
+
+		new Grammar(syms, assocRules, cognRules.immutableInstance, synRules)
+	}
+
 }
