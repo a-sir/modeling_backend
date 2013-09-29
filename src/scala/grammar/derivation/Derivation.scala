@@ -15,12 +15,13 @@ class Derivation() {
 
 	var posTrans: Map[CPoint, Set[PosTrans]] = Map()
 
-	def compute(query: Query): Set[Symbol] = {
+	def compute(query: Query): DerivationResult = {
 		posTrans = Map()
 		var reached: Set[Symbol] = Set()
+		var derivedSymbols: List[Pair[Symbol, AppliedTrans]] = List.empty
 		var points: Set[CPoint] = Set()
 
-		var forNextStep: mutable.PriorityQueue[AppliedTrans] = mutable.PriorityQueue.empty(cheapTransformComeFirst)
+		val forNextStep: mutable.PriorityQueue[AppliedTrans] = mutable.PriorityQueue.empty(cheapTransformComeFirst)
 
 		val ignoreSet: Set[Symbol] = query.query.foldLeft(Set[Symbol]())((set, symbol) => set + symbol)
 		val root: CPoint = new CPoint(query.query)
@@ -30,7 +31,12 @@ class Derivation() {
 			val aTrans = new AppliedTrans(pTrans.rule.cost, Option.empty, 1, pTrans, root)
 
 			points = points + pTrans.child
-			reached = pTrans.child.sentence.foldLeft(reached)((s, v) => if (ignoreSet.contains(v)) s else s + v)
+			val reachedByTransform: Set[Symbol] = pTrans.child.sentence.foldLeft(Set[Symbol]())(
+				(s, v) => if (ignoreSet.contains(v)) s else s + v
+			)
+
+			reached = reachedByTransform.foldLeft(reached)((s, v) => s + v)
+			derivedSymbols = reachedByTransform.foldLeft(derivedSymbols)((l, v) => Pair(v, aTrans) :: l)
 
 			if (aTrans.level <= query.maxLevelOfTransform) {
 				forNextStep.enqueue(aTrans)
@@ -48,14 +54,19 @@ class Derivation() {
 				)
 
 				points = points + pTrans.child
-				reached = pTrans.child.sentence.foldLeft(reached)((s, v) => if (ignoreSet.contains(v)) s else s + v)
+				val reachedByTransform: Set[Symbol] = pTrans.child.sentence.foldLeft(reached)(
+					(s, v) => if (ignoreSet.contains(v)) s else s + v
+				)
+
+				reached = reachedByTransform.foldLeft(reached)((s, v) => s + v)
+				derivedSymbols = reachedByTransform.foldLeft(derivedSymbols)((l, v) => Pair(v, aTrans) :: l)
 
 				if (aTrans.level <= query.maxLevelOfTransform) {
 					forNextStep.enqueue(aTrans)
 				}
 			}
 		}
-		reached
+		new DerivationResult(derivedSymbols)
 	}
 
 	private def getPossibleTrans(point: CPoint, grammar: Grammar): Set[PosTrans] = {
