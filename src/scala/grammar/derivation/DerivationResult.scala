@@ -1,11 +1,11 @@
 package grammar.derivation
 
-import grammar.Symbol
+import grammar.GSym
 
 /**
  * @author A.Sirenko
  *          Date: 9/19/13
  */
-class DerivationResult(val reached: List[Pair[Symbol, AppliedTrans]]) {
-	lazy val symbols: Set[Symbol] = reached.foldLeft(Set[Symbol]())((s, v) => s + v._1)
+class DerivationResult(val reached: List[Pair[GSym, AppliedTrans]]) {
+	lazy val symbols: Set[GSym] = reached.foldLeft(Set[GSym]())((s, v) => s + v._1)
 }

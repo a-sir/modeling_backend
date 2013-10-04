@@ -69,7 +69,7 @@ object Grammar {
 		val synRules = new RulesMutable
 		for (i <- 0 to (rawSyns.size() - 1)) {
 			val synsetSymbols = util.Collections.toList(rawSyns.getSynset(i))
-					.foldLeft(Set[Symbol]())((x, y) => x + syms.getOrCreateSymbol(y))
+					.foldLeft(Set[GSym]())((x, y) => x + syms.getOrCreateSymbol(y))
 			for (s1 <- synsetSymbols) {
 				for (s2 <- synsetSymbols.filter(_ != s1)) {
 					synRules.addRule(new Rule(List(s1), List(s2), 0.0))

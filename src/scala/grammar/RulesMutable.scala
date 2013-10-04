@@ -8,9 +8,9 @@ class RulesMutable {
 
 	var rules: Set[Rule] = Set.empty
 
-	var ruleByLeft: Map[Symbol, Set[Rule]] = Map.empty
+	var ruleByLeft: Map[GSym, Set[Rule]] = Map.empty
 
-	var ruleByRight: Map[Symbol, Set[Rule]] = Map.empty
+	var ruleByRight: Map[GSym, Set[Rule]] = Map.empty
 
 	def addRule(rule: Rule) {
 		if (!rules.contains(rule)) {
@@ -20,16 +20,16 @@ class RulesMutable {
 		}
 	}
 
-	def getByLeft(sym: Symbol) = ruleByLeft.get(sym)
+	def getByLeft(sym: GSym) = ruleByLeft.get(sym)
 
-	def getByRight(sym: Symbol) = ruleByRight.get(sym)
+	def getByRight(sym: GSym) = ruleByRight.get(sym)
 
 	def rulesCount = rules.size
 }
 
 object RulesMutable {
 
-	def addRuleForSymbols(rule: Rule, syms: List[Symbol], map: Map[Symbol, Set[Rule]]): Map[Symbol, Set[Rule]] = {
+	def addRuleForSymbols(rule: Rule, syms: List[GSym], map: Map[GSym, Set[Rule]]): Map[GSym, Set[Rule]] = {
 		var res = map
 		for (sym <- syms.distinct) {
 			val rules = map.get(sym)

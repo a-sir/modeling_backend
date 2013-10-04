@@ -1,6 +1,6 @@
 package grammar.derivation
 
-import grammar.{CognitiveRule, Rule, Symbol, Grammar}
+import grammar.{CognitiveRule, Rule, GSym, Grammar}
 import scala.collection.mutable
 
 /**
@@ -17,13 +17,13 @@ class Derivation() {
 
 	def compute(query: Query): DerivationResult = {
 		posTrans = Map()
-		var reached: Set[Symbol] = Set()
-		var derivedSymbols: List[Pair[Symbol, AppliedTrans]] = List.empty
+		var reached: Set[GSym] = Set()
+		var derivedSymbols: List[Pair[GSym, AppliedTrans]] = List.empty
 		var points: Set[CPoint] = Set()
 
 		val forNextStep: mutable.PriorityQueue[AppliedTrans] = mutable.PriorityQueue.empty(cheapTransformComeFirst)
 
-		val ignoreSet: Set[Symbol] = query.query.foldLeft(Set[Symbol]())((set, symbol) => set + symbol)
+		val ignoreSet: Set[GSym] = query.query.foldLeft(Set[GSym]())((set, symbol) => set + symbol)
 		val root: CPoint = new CPoint(query.query)
 		points = points + root
 
@@ -31,7 +31,7 @@ class Derivation() {
 			val aTrans = new AppliedTrans(pTrans.rule.cost, Option.empty, 1, pTrans, root)
 
 			points = points + pTrans.child
-			val reachedByTransform: Set[Symbol] = pTrans.child.sentence.foldLeft(Set[Symbol]())(
+			val reachedByTransform: Set[GSym] = pTrans.child.sentence.foldLeft(Set[GSym]())(
 				(s, v) => if (ignoreSet.contains(v)) s else s + v
 			)
 
@@ -54,7 +54,7 @@ class Derivation() {
 				)
 
 				points = points + pTrans.child
-				val reachedByTransform: Set[Symbol] = pTrans.child.sentence.foldLeft(reached)(
+				val reachedByTransform: Set[GSym] = pTrans.child.sentence.foldLeft(reached)(
 					(s, v) => if (ignoreSet.contains(v)) s else s + v
 				)
 
@@ -118,7 +118,7 @@ class Derivation() {
 		posTrans.get(point).get
 	}
 
-	def canApplyStrinctly(sentence: List[Symbol], offset: Int, ruleLeft: List[Symbol]): Boolean = {
+	def canApplyStrinctly(sentence: List[GSym], offset: Int, ruleLeft: List[GSym]): Boolean = {
 		if (ruleLeft.length > sentence.length - offset) {
 			return false
 		} else {

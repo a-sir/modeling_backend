@@ -7,7 +7,7 @@ import grammar._
  *          Date: 9/19/13
  */
 class Query(
-		val query: List[Symbol],
+		val query: List[GSym],
 		val grammar: Grammar,
 		val maxCountOfGeneratedSentences: Int,
 		val maxLevelOfTransform: Int) {

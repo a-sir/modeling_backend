@@ -13,15 +13,15 @@ class CognitiveRulesMutable {
 	private val rulesByContext
 			= new mutable.HashMap[String, mutable.Set[CognitiveRule]] with mutable.MultiMap[String, CognitiveRule]
 	private val rulesBySign
-			= new mutable.HashMap[Symbol, mutable.Set[CognitiveRule]] with mutable.MultiMap[Symbol, CognitiveRule]
+			= new mutable.HashMap[GSym, mutable.Set[CognitiveRule]] with mutable.MultiMap[GSym, CognitiveRule]
 	private val rulesBySense
-			= new mutable.HashMap[Symbol, mutable.Set[CognitiveRule]] with mutable.MultiMap[Symbol, CognitiveRule]
+			= new mutable.HashMap[GSym, mutable.Set[CognitiveRule]] with mutable.MultiMap[GSym, CognitiveRule]
 
 	def getByContext(context: String) = rulesByContext.get(context)
 
-	def getBySign(sym: Symbol) = rulesBySign.get(sym)
+	def getBySign(sym: GSym) = rulesBySign.get(sym)
 
-	def getBySense(sym: Symbol) = rulesBySense.get(sym)
+	def getBySense(sym: GSym) = rulesBySense.get(sym)
 
 	def addRule(rule: CognitiveRule) {
 		contexts = contexts ++ rule.context

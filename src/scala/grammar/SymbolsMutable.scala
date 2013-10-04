@@ -6,21 +6,21 @@ package grammar
  */
 class SymbolsMutable {
 
-	var nameToSymbol: Map[String, Symbol] = Map.empty
+	var nameToSymbol: Map[String, GSym] = Map.empty
 
-	var keyToSymbol: Map[Int, Symbol] = Map.empty
+	var keyToSymbol: Map[Int, GSym] = Map.empty
 
 	var counter = 0
 
-	def getSymbol(key: Int): Option[Symbol] = keyToSymbol.get(key)
+	def getSymbol(key: Int): Option[GSym] = keyToSymbol.get(key)
 
-	def getSymbol(name: String): Option[Symbol] = nameToSymbol.get(name)
+	def getSymbol(name: String): Option[GSym] = nameToSymbol.get(name)
 
-	def getOrCreateSymbol(name: String): Symbol = {
+	def getOrCreateSymbol(name: String): GSym = {
 		val current = getSymbol(name)
 		if (current == Option.empty) {
 			counter += 1
-			val sym = new Symbol(counter, name)
+			val sym = new GSym(counter, name)
 			nameToSymbol = nameToSymbol + (name -> sym)
 			keyToSymbol = keyToSymbol + (counter -> sym)
 			sym
@@ -29,8 +29,8 @@ class SymbolsMutable {
 		}
 	}
 
-	def getOrCreateSymbols(tokens: List[String]): List[Symbol] =
-		tokens.foldRight(List[Symbol]())((v,l) => getOrCreateSymbol(v) :: l)
+	def getOrCreateSymbols(tokens: List[String]): List[GSym] =
+		tokens.foldRight(List[GSym]())((v,l) => getOrCreateSymbol(v) :: l)
 
 	def size = keyToSymbol.size
 }
