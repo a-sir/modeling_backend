@@ -12,7 +12,11 @@ case class Report (
 
 @serializable
 class DerivedSymbol(val aggregatedCost: Double, val usedSymsFromQuery: Int, sym: grammar.GSym)
-		extends grammar.GSym(sym.key, sym.name)
+		extends grammar.GSym(sym.key, sym.name) {
+
+	override def toString = super.toString + " cost:" + aggregatedCost + " usedSyms:" + usedSymsFromQuery
+
+}
 
 object Report {
 
