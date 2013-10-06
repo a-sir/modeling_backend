@@ -30,9 +30,9 @@ object CognTransform {
 case class SynTransform(leftSyms: List[GSym], rightSyms: List[GSym], position: Int)
 		extends Rule(leftSyms, rightSyms, 0)
 
-class PosTrans(val rule: Rule, val child: CPoint)
+class PosTrans(val rule: Rule, val offset: Int, val child: CPoint)
 
 class AppliedTrans(
 		val reachedCost: Double, val parent: Option[AppliedTrans],
-		val level: Int, val posTrans: PosTrans, val root: CPoint
+		val level: Int, val posTrans: PosTrans, val root: CPoint, val sourceUsed: List[Boolean]
 )
