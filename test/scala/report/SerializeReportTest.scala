@@ -1,7 +1,6 @@
 package report
 
 import org.scalatest.FunSpec
-import util.StringUtils
 import grammar.report.{Report, DerivedSymbol}
 import grammar.GSym
 import java.io.{ByteArrayInputStream, ObjectInputStream, ByteArrayOutputStream, ObjectOutputStream}
