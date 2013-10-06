@@ -27,12 +27,16 @@ object CognTransform {
 	val DEFAULT_COST = 0.5
 }
 
+object SynTransform {
+	val DEFAULT_COST = 0.1
+}
+
 case class SynTransform(leftSyms: List[GSym], rightSyms: List[GSym], position: Int)
-		extends Rule(leftSyms, rightSyms, 0)
+		extends Rule(leftSyms, rightSyms, SynTransform.DEFAULT_COST)
 
-class PosTrans(val rule: Rule, val offset: Int, val child: CPoint)
+case class PosTrans(rule: Rule, offset: Int, child: CPoint)
 
-class AppliedTrans(
-		val reachedCost: Double, val parent: Option[AppliedTrans],
-		val level: Int, val posTrans: PosTrans, val root: CPoint, val sourceUsed: List[Boolean]
+case class AppliedTrans(
+		reachedCost: Double, parent: Option[AppliedTrans],
+		level: Int, posTrans: PosTrans, root: CPoint, sourceUsed: List[Boolean]
 )
