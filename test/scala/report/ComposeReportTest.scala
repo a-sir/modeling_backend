@@ -31,8 +31,7 @@ class ComposeReportTest  extends FunSpec {
 			val derived = derivation.compute(query)
 			
 			val report = Report.compose(query, derived)
-			Console.println(report)
-			assert(report.symbols.length == 2)
+			fail()
 		}
 	}
 

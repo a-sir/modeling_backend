@@ -27,9 +27,11 @@ class Derivation() {
 		val root: CPoint = new CPoint(query.query)
 		points = points + root
 
+		val initialHistory: List[History] = History.initialHistory(query.query.length)
+
 		for (pTrans : PosTrans <- getPossibleTrans(root, query.grammar)) {
 			val aTrans = new AppliedTrans(
-				pTrans.rule.cost, Option.empty, 1, pTrans, root, List.fill(root.sentence.length){false}
+				pTrans.rule.cost, Option.empty, 1, pTrans, root, History.buildHistory(initialHistory, pTrans)
 			)
 
 			points = points + pTrans.child
@@ -70,14 +72,10 @@ class Derivation() {
 	}
 
 	private def composeNextAppliedTransform(parentTrans: AppliedTrans, posTransToApply: PosTrans): AppliedTrans = {
-		val sourceUsed = parentTrans.sourceUsed.patch(
-			posTransToApply.offset,
-			List.fill(posTransToApply.rule.right.length) {true},
-			posTransToApply.rule.left.length
-		)
 		new AppliedTrans(
 			posTransToApply.rule.cost + parentTrans.reachedCost,
-			Option(parentTrans), parentTrans.level + 1, posTransToApply, parentTrans.posTrans.child, sourceUsed
+			Option(parentTrans), parentTrans.level + 1, posTransToApply, parentTrans.posTrans.child,
+			History.buildHistory(parentTrans.hist, posTransToApply)
 		)
 	}
 

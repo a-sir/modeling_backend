@@ -1,7 +1,7 @@
 package grammar.report
 
 import grammar.GSym
-import grammar.derivation.{AppliedTrans, Query, DerivationResult}
+import grammar.derivation._
 
 /**
  * @author A.Sirenko
@@ -28,7 +28,7 @@ object Report {
 					.foldLeft(List[AppliedTrans]())((list, pair) => pair._2 :: list)
 			val aggregatedCost = aggregateCost(transforms.foldLeft(List[Double]())((l, v) => v.reachedCost :: l))
 			val sourceUsed = aggregateSourceUsage(
-				transforms.foldLeft(List[List[Boolean]]())((ll, v) => v.sourceUsed :: ll),
+				transforms.foldLeft(List[History]())((ll, tr) => tr.hist ::: ll),
 				query.query.length
 			)
 
@@ -46,8 +46,7 @@ object Report {
 		}
 	}
 
-	def aggregateSourceUsage(sourceUsed: List[List[Boolean]], totalSymsInQuery: Int): Int =
-		sourceUsed.foldLeft(0)((sum, v) => sum + totalSymsInQuery - v.count(_ == false)) / sourceUsed.length
-
+	def aggregateSourceUsage(sourceUsed: List[History], totalSymsInQuery: Int): Int =
+		sourceUsed.foldLeft(Set[Int]())((s, h) => s ++ h.sourceUsed).size
 }
 
