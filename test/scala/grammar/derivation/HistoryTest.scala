@@ -12,7 +12,6 @@ class HistoryTest extends FunSpec {
 	describe("A History") {
 
 		it("should create correct initialHistory)") {
-			val init = History.initialHistory(3)
 			assert(History.initialHistory(3) == List(
 							new History(Option(0), Set.empty),
 							new History(Option(1), Set.empty),

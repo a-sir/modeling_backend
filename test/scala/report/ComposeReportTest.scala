@@ -4,7 +4,7 @@ import org.scalatest.FunSpec
 import grammar.report.Report
 import util.NumUtils._
 import grammar.Grammar
-import grammar.derivation.{Query, Derivation}
+import grammar.derivation.{DerivationResult, Query, Derivation}
 
 /**
  * @author A.Sirenko
@@ -30,8 +30,10 @@ class ComposeReportTest  extends FunSpec {
 			val derivation = new Derivation
 			val derived = derivation.compute(query)
 			
-			val report = Report.compose(query, derived)
-			fail()
+			val report: Report = Report.compose(query, derived)
+			assert(report.symbols.size == 2)
+			assert(report.symbols(0).usedSymsFromQuery == 2)
+			assert(report.symbols(1).usedSymsFromQuery == 2)
 		}
 	}
 
