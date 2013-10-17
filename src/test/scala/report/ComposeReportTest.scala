@@ -4,10 +4,7 @@ import org.scalatest.FunSpec
 import grammar.report.Report
 import util.NumUtils._
 import grammar.Grammar
-import grammar.derivation.{DerivationResult, Query, Derivation}
-import scala.pickling._
-import json._
-
+import grammar.derivation.{Query, Derivation}
 /**
  * @author A.Sirenko
  *          Date: 10/6/13
@@ -36,9 +33,6 @@ class ComposeReportTest  extends FunSpec {
 			assert(report.symbols.size == 2)
 			assert(report.symbols(0).usedSymsFromQuery == 2)
 			assert(report.symbols(1).usedSymsFromQuery == 2)
-
-			val pckl = List(1, 2, 3, 4).pickle
-			Console.print(pckl)
 		}
 	}
 
