@@ -14,9 +14,9 @@ class GrammarTest extends FunSpec {
 		it("should consist of associative, cognitive rules and synonims") {
 			val assocNet = AssociativeNet.loadDefaultNet()
 			val g: Grammar = Grammar.create(assocNet, Lemmatizer.create())
-			assert(g.getAssocRulesCount == 69382)
-			assert(g.getCognRulesCount == 740069)
-			assert(g.getSynRulesCount == 304856)
+			assert(g.getAssocRulesCount === 69405)
+			assert(g.getCognRulesCount === 740069)
+			assert(g.getSynRulesCount === 315984)
 		}
 
 	}
