@@ -10,3 +10,5 @@
 target/
 .idea
 .idea_modules
+.ivy/
+.ivy2/
