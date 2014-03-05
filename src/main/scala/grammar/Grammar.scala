@@ -3,8 +3,9 @@ package grammar
 import assoc_net.{Connection, AssociativeNet}
 import lemms.Lemmatizer
 import synsets.{Loader, Synsets}
-import java.nio.file.Paths
 import import_ling.CognemReader
+import scala.collection.JavaConverters._
+import cognems.Cognem
 
 /**
  * @author A.Sirenko
@@ -26,16 +27,16 @@ class Grammar(
 
 object Grammar {
 
-	def create(assoc: AssociativeNet, lemmatizer: Lemmatizer): Grammar = {
+	def create(assoc: AssociativeNet, lemmatizer: Lemmatizer, cognems: List[Cognem]): Grammar = {
 		val syms = new SymbolsMutable
 		val rules = new RulesMutable
 
 		val keepUnknownWordforms = true
 
 		// Assume assoc
-		for (stim: String <- util.Collections.toList(assoc.getStims)) {
+		for (stim: String <- assoc.getStims.asScala.toIterable) {
 			var total = 0
-			val conns: List[Connection] = util.Collections.toList(assoc.getConnsForStim(stim).getConns)
+			val conns: Iterable[Connection] = assoc.getConnsForStim(stim).getConns.asScala.toIterable
 			for (conn: Connection <- conns) {
 				total += conn.getCount
 			}
@@ -58,14 +59,14 @@ object Grammar {
 		}
 
 		val cognRules = new CognitiveRulesMutable
-		for (cogn <- CognemReader.filterCognemsByChars(CognemReader.defaultSet)) {
+		for (cogn <- CognemReader.filterCognemsByChars(cognems)) {
 			val left = syms.getOrCreateSymbols(lemmatizer.tokenizeAndLemmatize(cogn.name, keepUnknownWordforms))
 			val right = syms.getOrCreateSymbols(lemmatizer.tokenizeAndLemmatize(cogn.sense, keepUnknownWordforms))
 			cognRules.addRule(new CognitiveRule(left, right, util.Collections.toList(cogn.context)))
 		}
 
 		// synsets
-		val rawSyns: Synsets = Loader.read(Paths.get("data/princeton_wp_synsets"))
+		val rawSyns: Synsets = Loader.readDefault()
 		val synRules = new RulesMutable
 		for (i <- 0 to (rawSyns.size() - 1)) {
 			val synsetSymbols = util.Collections.toList(rawSyns.getSynset(i))
