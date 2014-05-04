@@ -81,7 +81,7 @@ class Derivation() {
 
 	private def getPossibleTrans(point: CPoint, grammar: Grammar): Set[PosTrans] = {
 		if (!posTransCached.contains(point)) {
-			// synonim trans
+			// synonym trans
 			var posSet: Set[PosTrans] = Set.empty
 			var offset = 0
 			for (s <- point.sentence) {
