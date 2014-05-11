@@ -1,13 +1,16 @@
 package grammar.derivation
 
-import grammar.{CognitiveRule, Rule, GSym, Grammar}
+import grammar.{Rule, GSym, Grammar}
 import scala.collection.mutable
+import NLP._
+import scala.collection.JavaConverters._
+import NLP.SuffixAmt.EditOperation
 
 /**
  * @author A.Sirenko
  *          Date: 9/17/13
  */
-class Derivation() {
+class Derivation(val suffixAmt: SuffixAmt, val countOfResultsFromOneSentence: Int) {
 
 	val cheapTransformComeFirst = new scala.Ordering[AppliedTrans] {
 		def compare(x: AppliedTrans, y: AppliedTrans): Int = x.reachedCost.compareTo(y.reachedCost)
@@ -88,47 +91,57 @@ class Derivation() {
 				val synRules = grammar.synRules.getByLeft(s)
 				if (synRules != Option.empty) {
 					for (r <- synRules.get) {
-						val rule: SynTransform = new SynTransform(r.left, r.right, offset)
-						val child = point.apply(rule)
-						posSet = posSet + new PosTrans(rule, offset, child)
+						val child = point.apply(r, offset, r.left.size)
+						posSet = posSet + new PosTrans(r, offset, child)
 					}
 				}
 				offset = offset + 1
 			}
 
+
+            val sentence: List[Integer] = point.sentence.foldRight(List.empty[Integer])((a, b) => a.key :: b)
+            suffixAmt.buildTree(sentence.asJava)
+            val posRules = grammar.cognRules.allRules.filter((p: Rule) => point.sentence.contains(p.left))
+            for (r: Rule <- posRules) {
+                val results: java.util.List[AmtResult]
+                        = suffixAmt.treeSearch(r, r.leftKeys.asJava, countOfResultsFromOneSentence)
+                for (amt: AmtResult <- results.asScala) {
+                    assert(r == amt.getRule)
+                    for (pos <- amt.getPos) {
+                        val leftReplace: Int = amt.getOperations.foldLeft(r.left.size) (
+                            (a,b) =>
+                                if (b == EditOperation.INS) {
+                                    a - 1
+                                } else if (b == EditOperation.DEL) {
+                                    a + 1
+                                } else {
+                                    a
+                                }
+                        )
+                        // TODO use cost of derivation amt.getCost
+                        val child: CPoint = point.apply(r, pos, leftReplace)
+                        posSet = posSet + new PosTrans(r, pos, child)
+                    }
+                }
+            }
+
 			for (offset <- 0 to point.sentence.length - 1) {
 		   		val sym = point.sentence(offset)
 				val rules = grammar.assocRules.getByLeft(sym)
 				if (rules != Option.empty && !rules.get.isEmpty) {
-					for(r <- rules.get.filter((r: Rule) => canApplyStrinctly(point.sentence, offset, r.left))) {
-						val transform: AssocTransform = new AssocTransform(r.left, r.right, r.cost, offset)
-						val child = point.apply(transform)
-						posSet = posSet + new PosTrans(transform, offset, child)
+					for(r <- rules.get.filter((r: Rule) => canApplyStrictly(point.sentence, offset, r.left))) {
+						val child = point.apply(r, offset, r.left.size)
+						posSet = posSet + new PosTrans(r, offset, child)
 					}
 				}
 			}
 
-			for (offset <- 0 to point.sentence.length - 1) {
-				val sym = point.sentence(offset)
-
-				if (grammar.cognRules.rulesBySense.contains(sym)) {
-					val rules: mutable.Set[CognitiveRule] = grammar.cognRules.rulesBySense(sym)
-					for(r <- rules.filter((r: CognitiveRule) => canApplyStrinctly(point.sentence, offset, r.left))) {
-						val transform: CognTransform = new CognTransform(
-							r.left, r.right, CognTransform.DEFAULT_COST, Pair(offset, offset + r.left.length),
-							"strict replace"
-						)
-						val child = point.apply(transform)
-						posSet = posSet + new PosTrans(transform, offset, child)
-					}
-				}
-			}
 			posTransCached = posTransCached + (point -> posSet)
 		}
 		posTransCached.get(point).get
 	}
 
-	def canApplyStrinctly(sentence: List[GSym], offset: Int, ruleLeft: List[GSym]): Boolean = {
+	def canApplyStrictly(sentence: List[GSym], offset: Int, ruleLeft: List[GSym]): Boolean = {
 		if (ruleLeft.length > sentence.length - offset) {
 			return false
 		} else {
@@ -140,4 +153,19 @@ class Derivation() {
 		}
 		true
 	}
+}
+
+object Derivation {
+
+    def createForStrings: Derivation = {
+        new Derivation(
+            new SuffixAmtStrings(
+                    AmtDictionaryStrings.newInstance(),
+                    SuffixAmt.defaultCosts,
+                    3
+            ),
+            10
+        )
+    }
+
 }

@@ -37,5 +37,8 @@ class CognitiveRulesMutable {
 		rules = rule :: rules
 	}
 
-	def immutableInstance = new CognitiveRulesImmutable(contexts, rulesByContext, rulesBySign, rulesBySense, rules)
+	def immutableInstance = new CognitiveRulesImmutable(
+        contexts, rulesByContext, rulesBySign, rulesBySense, rules,
+        rules.foldLeft(List.empty[Rule])((a, b) => Rule.createCognitive(b.left, b.right) :: a)
+    )
 }

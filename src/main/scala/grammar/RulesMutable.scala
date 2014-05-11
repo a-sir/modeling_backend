@@ -4,7 +4,7 @@ package grammar
  * @author A.Sirenko
  *          Date: 9/8/13
  */
-class RulesMutable {
+class RulesMutable() {
 
 	var rules: Set[Rule] = Set.empty
 

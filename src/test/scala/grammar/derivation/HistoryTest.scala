@@ -28,7 +28,7 @@ class HistoryTest extends FunSpec {
 			val first: List[History] = History.buildHistory(
 				originalHistory,
 				new PosTrans(
-						new Rule(syms.slice(0, 2), syms.slice(0, 3), 1),
+						Rule.createAssoc(syms.slice(0, 2), syms.slice(0, 3), 0.5),
 						0,
 						fakePoint
 				)
@@ -45,7 +45,7 @@ class HistoryTest extends FunSpec {
 
 			val second: List[History] = History.buildHistory(
 				first,
-				new PosTrans(new Rule(syms.slice(0, 2), syms.slice(0, 1), 1), 4, fakePoint)
+				new PosTrans(Rule.createAssoc(syms.slice(0, 2), syms.slice(0, 1), 1), 4, fakePoint)
 			)
 
 			assert(second == List(
@@ -58,7 +58,7 @@ class HistoryTest extends FunSpec {
 
 			val third: List[History] = History.buildHistory(
 				second,
-				new PosTrans(new Rule(syms.slice(0, 4), syms.slice(0, 1), 1), 1, fakePoint)
+				new PosTrans(Rule.createAssoc(syms.slice(0, 4), syms.slice(0, 1), 1), 1, fakePoint)
 			)
 
 			assert(third == List(
@@ -68,7 +68,7 @@ class HistoryTest extends FunSpec {
 
 			val forth: List[History] = History.buildHistory(
 				second,
-				new PosTrans(new Rule(syms.slice(0, 3), syms.slice(0, 1), 1), 3, fakePoint)
+				new PosTrans(Rule.createAssoc(syms.slice(0, 3), syms.slice(0, 1), 1), 3, fakePoint)
 			)
 
 			assert(forth == List(

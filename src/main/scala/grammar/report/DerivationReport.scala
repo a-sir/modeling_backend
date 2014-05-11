@@ -7,7 +7,7 @@ import grammar.derivation._
  * @author A.Sirenko
  *          Date: 9/29/13
  */
-case class Report (
+case class DerivationReport (
 		query: List[GSym], levelLimit: Int, transformLimit: Int, symbols: List[DerivedSymbol])
 
 @serializable
@@ -18,9 +18,9 @@ class DerivedSymbol(val aggregatedCost: Double, val usedSymsFromQuery: Int, sym:
 
 }
 
-object Report {
+object DerivationReport {
 
-	def compose(query: Query, deriv: DerivationResult): Report = {
+	def compose(query: Query, deriv: DerivationResult): DerivationReport = {
 		var syms: List[DerivedSymbol] = List.empty
 
 		for (reached <- deriv.symbols) {
@@ -35,7 +35,7 @@ object Report {
 			syms = new DerivedSymbol(aggregatedCost, sourceUsed, reached) :: syms
 		}
 
-		new Report(query.query, query.maxLevelOfTransform, query.maxCountOfGeneratedSentences, syms)
+		new DerivationReport(query.query, query.maxLevelOfTransform, query.maxCountOfGeneratedSentences, syms)
 	}
 
 	def aggregateCost(values: List[Double]): Double = {

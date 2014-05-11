@@ -51,7 +51,7 @@ object Grammar {
 					)
 					if (!lemReakSymbols.isEmpty) {
 						val count = conn.getCount
-						val rule = new Rule(lemStimSymbols, lemReakSymbols, count * 1.0 / total)
+						val rule = Rule.createAssoc(lemStimSymbols, lemReakSymbols, count * 1.0 / total)
 						rules.addRule(rule)
 					}
 				}
@@ -73,7 +73,7 @@ object Grammar {
 					.foldLeft(Set[GSym]())((x, y) => x + syms.getOrCreateSymbol(y))
 			for (s1 <- synsetSymbols) {
 				for (s2 <- synsetSymbols.filter(_ != s1)) {
-					synRules.addRule(new Rule(List(s1), List(s2), 0.0))
+					synRules.addRule(Rule.createSyn(List(s1), List(s2)))
 				}
 			}
 		}
@@ -86,11 +86,11 @@ object Grammar {
 
 		val assocRules = new RulesMutable
 		assocRules.addRule(
-			new Rule(
-				syms.getOrCreateSymbols(List("a")),
+			Rule.createAssoc(
+                syms.getOrCreateSymbols(List("a")),
 				syms.getOrCreateSymbols(List("b")), 0.5))
 		assocRules.addRule(
-			new Rule(
+			Rule.createAssoc(
 				syms.getOrCreateSymbols(List("b")),
 				syms.getOrCreateSymbols(List("a", "b")), 0.3))
 
@@ -104,9 +104,9 @@ object Grammar {
 
 		val synRules = new RulesMutable
 		synRules.addRule(
-			new Rule(
+			Rule.createSyn(
 				syms.getOrCreateSymbols(List("c")),
-				syms.getOrCreateSymbols(List("d")), 0.0)
+				syms.getOrCreateSymbols(List("d")))
 		)
 
 		new Grammar(syms, assocRules, cognRules.immutableInstance, synRules)

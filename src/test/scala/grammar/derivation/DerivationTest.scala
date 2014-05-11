@@ -3,6 +3,7 @@ package grammar.derivation
 import org.scalatest.FunSpec
 import grammar.Grammar
 import util.TestUtils
+import NLP.{AmtDictionaryStrings, SuffixAmtStrings, SuffixAmt}
 
 /**
  * @author A.Sirenko
@@ -14,7 +15,8 @@ class DerivationTest extends FunSpec {
 		it("should produce sentences until limits are met") {
 			val grammar = Grammar.createMock()
 			val sentence = grammar.syms.getOrCreateSymbols(List("a", "c"))
-			val deriv = new Derivation
+
+			val deriv = Derivation.createForStrings
 			val reached = deriv.compute(new Query(sentence, grammar, 5, 3))
 			assert(!reached.symbols.isEmpty)
 			val reachedLetters = reached.symbols.foldLeft(Set[String]())((s, v) => s + v.name)
