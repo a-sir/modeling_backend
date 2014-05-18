@@ -98,7 +98,7 @@ class Derivation(val suffixAmt: SuffixAmt, val countOfResultsFromOneSentence: In
 				offset = offset + 1
 			}
 
-
+            // cognitive
             val sentence: List[Integer] = point.sentence.foldRight(List.empty[Integer])((a, b) => a.key :: b)
             suffixAmt.buildTree(sentence.asJava)
             val posRules = grammar.cognRules.allRules.filter((p: Rule) => point.sentence.contains(p.left))
@@ -118,13 +118,14 @@ class Derivation(val suffixAmt: SuffixAmt, val countOfResultsFromOneSentence: In
                                     a
                                 }
                         )
-                        // TODO use cost of derivation amt.getCost
-                        val child: CPoint = point.apply(r, pos, leftReplace)
-                        posSet = posSet + new PosTrans(r, pos, child)
+                        val appliedRule: Rule = Rule.createWeightedCognitive(r.left, r.right, amt.getCost)
+                        val child: CPoint = point.apply(appliedRule, pos, leftReplace)
+                        posSet = posSet + new PosTrans(appliedRule, pos, child)
                     }
                 }
             }
 
+            // assoc
 			for (offset <- 0 to point.sentence.length - 1) {
 		   		val sym = point.sentence(offset)
 				val rules = grammar.assocRules.getByLeft(sym)

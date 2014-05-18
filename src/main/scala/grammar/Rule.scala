@@ -27,6 +27,10 @@ object Rule {
         new Rule(Rule.nextKey, left, right, -1)
     }
 
+    def createWeightedCognitive(left: List[GSym], right: List[GSym], cost: Double): Rule = {
+        new Rule(Rule.nextKey, left, right, cost)
+    }
+
     def createSyn(left: List[GSym], right: List[GSym]): Rule = {
         new Rule(Rule.nextKey, left, right, 0)
     }
