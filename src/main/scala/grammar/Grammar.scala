@@ -1,7 +1,7 @@
 package grammar
 
 import assoc_net.{Connection, AssociativeNet}
-import lemms.Lemmatizer
+import lemms.{LemmatizerSameImpl, Lemmatizer, LemmatizerImpl}
 import synsets.{Loader, Synsets}
 import import_ling.CognemReader
 import scala.collection.JavaConverters._
@@ -15,7 +15,8 @@ class Grammar(
 		val syms: SymbolsMutable,
 		val assocRules: RulesMutable,
 		val cognRules: CognitiveRulesImmutable,
-		val synRules: RulesMutable) {
+		val synRules: RulesMutable,
+        val lemmatizer: Lemmatizer) {
 
 	override def toString = "Grammar with " + assocRules.rulesCount + " assoc rules"
 
@@ -23,11 +24,26 @@ class Grammar(
 	def getCognRulesCount = cognRules.size
 	def getSynRulesCount = synRules.rulesCount
 	def countOfSyms = syms.size
+
+    def getSymbols(tokens: List[String]): List[GSym] = {
+        tokens.foldLeft(List.empty[GSym])((a, b) => {
+            val sym = syms.getSymbol(b)
+            if (sym.isEmpty) {
+                a
+            } else {
+                sym.get :: a
+            }
+        })
+    }
 }
 
 object Grammar {
 
-	def create(assoc: AssociativeNet, lemmatizer: Lemmatizer, cognems: List[Cognem]): Grammar = {
+    def createEnglishGrammar(): Grammar = {
+        create(AssociativeNet.loadDefaultNet(), LemmatizerImpl.create(), CognemReader.defaultSet)
+    }
+
+	def create(assoc: AssociativeNet, lemmatizer: LemmatizerImpl, cognems: List[Cognem]): Grammar = {
 		val syms = new SymbolsMutable
 		val rules = new RulesMutable
 
@@ -78,7 +94,7 @@ object Grammar {
 			}
 		}
 
-		new Grammar(syms, rules, cognRules.immutableInstance, synRules)
+		new Grammar(syms, rules, cognRules.immutableInstance, synRules, lemmatizer)
 	}
 
 	def createMock(): Grammar = {
@@ -109,7 +125,7 @@ object Grammar {
 				syms.getOrCreateSymbols(List("d")))
 		)
 
-		new Grammar(syms, assocRules, cognRules.immutableInstance, synRules)
+		new Grammar(syms, assocRules, cognRules.immutableInstance, synRules, new LemmatizerSameImpl())
 	}
 
 }

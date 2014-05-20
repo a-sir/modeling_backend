@@ -6,9 +6,9 @@ import org.scalatest.FunSpec
  * @author A.Sirenko
  *          Date: 9/8/13
  */
-class LemmatizerTest extends FunSpec {
+class LemmatizerImplTest extends FunSpec {
 
-	lazy val lemmatizer: Lemmatizer = Lemmatizer.create()
+	lazy val lemmatizer: LemmatizerImpl = LemmatizerImpl.create()
 
 	describe("A Lemmatizer") {
 
@@ -25,7 +25,7 @@ class LemmatizerTest extends FunSpec {
 		}
 
 		it("should consider several delimeters") {
-			assert(Lemmatizer.tokenize("abra cadabra,'really':fun") == List("abra", "cadabra", "really", "fun"))
+			assert(LemmatizerImpl.tokenize("abra cadabra,'really':fun") == List("abra", "cadabra", "really", "fun"))
 		}
 
 		it("should be able to prepare lemmatized tokens") {

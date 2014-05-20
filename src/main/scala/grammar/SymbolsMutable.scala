@@ -1,5 +1,8 @@
 package grammar
 
+import utils.Keyable
+import java.util
+
 /**
  * @author A.Sirenko
  *          Date: 9/8/13
@@ -15,6 +18,14 @@ class SymbolsMutable {
 	def getSymbol(key: Int): Option[GSym] = keyToSymbol.get(key)
 
 	def getSymbol(name: String): Option[GSym] = nameToSymbol.get(name)
+
+    def getSymbolsDictionary: java.util.HashMap[Integer, Keyable[Integer]] = {
+        val map = new util.HashMap[Integer, Keyable[Integer]]()
+        for (gsym <- keyToSymbol.values) {
+            map.put(gsym.getKey, gsym)
+        }
+        map
+    }
 
 	def getOrCreateSymbol(name: String): GSym = {
 		val current = getSymbol(name)

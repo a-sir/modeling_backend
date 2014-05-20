@@ -1,7 +1,7 @@
 package import_ling
 
 import org.scalatest.FunSpec
-import lemms.Lemmatizer
+import lemms.LemmatizerImpl
 import cognems.Cognem
 
 /**

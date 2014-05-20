@@ -2,7 +2,7 @@ package grammar
 
 import org.scalatest.FunSpec
 import assoc_net.AssociativeNet
-import lemms.Lemmatizer
+import lemms.LemmatizerImpl
 import import_ling.CognemReader
 import cognems.Cognem
 
@@ -16,7 +16,7 @@ class GrammarTest extends FunSpec {
 		it("should consist of associative, cognitive rules and synonims") {
 			val assocNet = AssociativeNet.loadDefaultNet()
       val cognems: List[Cognem] = CognemReader.defaultSet
-			val g: Grammar = Grammar.create(assocNet, Lemmatizer.create(), cognems)
+			val g: Grammar = Grammar.create(assocNet, LemmatizerImpl.create(), cognems)
 			assert(g.getAssocRulesCount === 69405)
 			assert(g.getCognRulesCount === 485079)
 			assert(g.getSynRulesCount === 315984)

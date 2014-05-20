@@ -5,6 +5,7 @@ import scala.collection.mutable
 import NLP._
 import scala.collection.JavaConverters._
 import NLP.SuffixAmt.EditOperation
+import utils.Keyable
 
 /**
  * @author A.Sirenko
@@ -165,6 +166,19 @@ object Derivation {
                     SuffixAmt.defaultCosts,
                     3
             ),
+            10
+        )
+    }
+
+    def createForDictionary(g: Grammar): Derivation = {
+
+        val amt: AmtDictionary[Keyable[Integer]] = new AmtDictionary[Keyable[Integer]](g.syms.getSymbolsDictionary) {
+            override def getName(p1: Int): String = map.get(p1).toString
+        }
+        val suffixAmt: SuffixAmt = new SuffixAmt(amt, SuffixAmt.defaultCosts(), 3)
+
+        new Derivation(
+            suffixAmt,
             10
         )
     }
