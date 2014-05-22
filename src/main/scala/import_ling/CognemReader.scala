@@ -10,7 +10,9 @@ import scala.collection.JavaConverters._
  */
 object CognemReader {
 
-	lazy val defaultSet : List[Cognem] = Cognem.loadDefault().asScala.toList
+	lazy val defaultSet : List[Cognem] = {
+        Cognem.loadEnglishWiktionaryEntities().asScala.toList
+    }
 
 	def filterCognemsByChars(cognems: List[Cognem]): List[Cognem] = {
 		cognems.filter(

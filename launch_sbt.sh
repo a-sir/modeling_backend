@@ -1,3 +1,4 @@
 #!/bin/sh
+export SBT_OPTS="-Xmx1536M -Xms512M -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=2G -Xss2M -Duser.timezone=GMT"
 
-java -Dsbt.ivy.home=./.ivy2/cache -Xms512M -Xmx1536M -Xss1M -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=384M -jar ./lib/sbt-launch.jar "$@"
+java -Dsbt.ivy.home=./.ivy2/cache -jar ./lib/sbt-launch.jar "$@"
