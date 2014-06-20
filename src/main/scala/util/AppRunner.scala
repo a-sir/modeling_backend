@@ -7,7 +7,7 @@ package util
 
 import akka.actor._
 
-object HelloRemote extends App  {
+object AppRunner extends App {
   def confStr(port: Int) = "akka {\n" +
           "//loglevel = \"DEBUG\"\n" +
           "  actor {\n  provider = \"akka.remote.RemoteActorRefProvider\"\n }\n\n" +
@@ -22,15 +22,14 @@ object HelloRemote extends App  {
           "}"
   val conf = com.typesafe.config.ConfigFactory.parseString(confStr(2552))
   val system = ActorSystem("ModelingActorSystem", conf)
-  val remoteActor = system.actorOf(Props[RemoteActor], name = "RemoteActor")
-  remoteActor ! "The RemoteActor is alive"
+  val remoteActor = system.actorOf(Props[InterfaceActor], name = "InterfaceActor")
+  remoteActor ! "Started"
 }
 
-class RemoteActor extends Actor {
+class InterfaceActor extends Actor {
   def receive = {
-    case msg: String =>
-        println("RemoteActor received message " + msg)
-        sender ! "Hello from the RemoteActor"
+    case "Ping" => sender ! "Pong"
+    case msg: String => println("InterfaceActor received message " + msg )
   }
 }
 
