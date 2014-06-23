@@ -26,6 +26,18 @@ object AppRunner extends App {
 
     var tasks: Map[String, JsObject] = Map.empty
 
+    def getTaskStatus(sessionId: String): JsObject = {
+      Json.obj(
+        "sessionId" -> sessionId,
+        "status" -> (
+          tasks.get(sessionId) match {
+              case some: Some[JsObject] => some.get.asInstanceOf[JsObject]
+              case _ => JsNull
+          }
+        )
+      )
+    }
+
     val conf = com.typesafe.config.ConfigFactory.parseString(confStr(2552))
     val system = ActorSystem("ModelingActorSystem", conf)
     val remoteActor = system.actorOf(Props[InterfaceActor], name = "InterfaceActor")
@@ -41,33 +53,38 @@ class InterfaceActor extends Actor {
         case msg: String =>
             println("InterfaceActor received message " + msg)
             if (msg.startsWith("query:")) {
-                val json = Json.parse(msg.substring(6))
-                val query = (json \ "query").as[String]
-                val sessionId = (json \ "sessionId").as[String]
-
-                val l: List[String] = lemm.tokenizeAndLemmatize(query, dontKeepUnknownWordforms)
-
-                if (l.size > 0) {
-                    AppRunner.tasks += sessionId -> Json.obj(
-                        "orig_query" -> query,
-                        "lemmatized_query" -> l.mkString(","),
-                        "state" -> "lemmatized query"
-                    )
-                    println("Lemmatized correctly: " + AppRunner.tasks.get(sessionId))
-                } else {
-                    AppRunner.tasks += sessionId -> Json.obj(
-                        "orig_query" -> query,
-                        "state" -> "failed lemmatization of query"
-                    )
-                    println("Lemmatization failed")
-                }
-                AppRunner.tasks.get(sessionId) match {
-                    case some: Some[JsObject] =>
-                        val o: JsObject = some.get.asInstanceOf[JsObject]
-                        sender ! o.toString()
-                    case _ => println("No info for session " + sessionId)
-                }
+              processQuery(msg.substring(6))
+            } else if (msg.startsWith("session_status:")) {
+              sendStatusUpdate(msg.substring(15))
             }
+    }
+
+    def sendStatusUpdate(sessionId: String) {
+      sender ! "status_update:" + AppRunner.getTaskStatus(sessionId).toString()
+    }
+
+    def processQuery(q: String) {
+        val json = Json.parse(q)
+        val query = (json \ "query").as[String]
+        val sessionId = (json \ "sessionId").as[String]
+
+        val l: List[String] = lemm.tokenizeAndLemmatize(query, dontKeepUnknownWordforms)
+
+        if (l.size > 0) {
+            AppRunner.tasks += sessionId -> Json.obj(
+                "orig_query" -> query,
+                "lemmatized_query" -> l.mkString(","),
+                "state" -> "lemmatized query"
+            )
+            println("Lemmatized correctly: " + AppRunner.tasks.get(sessionId))
+        } else {
+            AppRunner.tasks += sessionId -> Json.obj(
+                "orig_query" -> query,
+                "state" -> "failed lemmatization of query"
+            )
+            println("Lemmatization failed")
+        }
+        sendStatusUpdate(sessionId)
     }
 }
 
