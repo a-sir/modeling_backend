@@ -80,7 +80,8 @@ class InterfaceActor extends Actor {
         } else {
             AppRunner.tasks += sessionId -> Json.obj(
                 "orig_query" -> query,
-                "state" -> "failed lemmatization of query"
+                "state" -> "failed",
+                "state_description" -> "failed lemmatization of query"
             )
             println("Lemmatization failed")
         }
