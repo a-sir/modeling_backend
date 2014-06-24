@@ -1,5 +1,8 @@
 package grammar.derivation
 
+import java.util.Comparator
+import java.util.function.{ToDoubleFunction, ToIntFunction, ToLongFunction, Function}
+
 import grammar.{Rule, GSym, Grammar}
 import scala.collection.mutable
 import NLP._
@@ -13,19 +16,21 @@ import utils.Keyable
  */
 class Derivation(val suffixAmt: SuffixAmt, val countOfResultsFromOneSentence: Int) {
 
-	val cheapTransformComeFirst = new scala.Ordering[AppliedTrans] {
-		def compare(x: AppliedTrans, y: AppliedTrans): Int = x.reachedCost.compareTo(y.reachedCost)
-	}
+  case class OrderedAppliedTrans(t: AppliedTrans)
 
-	var posTransCached: Map[CPoint, Set[PosTrans]] = Map()
+  implicit def orderedFoo(t: OrderedAppliedTrans): Ordered[OrderedAppliedTrans] = new Ordered[OrderedAppliedTrans] {
+    def compare(other: OrderedAppliedTrans) = t.t.reachedCost.compareTo(other.t.reachedCost)
+  }
+
+	var posTransCached: Map[CPoint, Set[PosTrans]] = Map.empty
 
 	def compute(query: Query): DerivationResult = {
-		posTransCached = Map()
-		var reached: Set[GSym] = Set()
-		var derivedSymbols: List[Pair[GSym, AppliedTrans]] = List.empty
-		var points: Set[CPoint] = Set()
+		posTransCached = Map.empty
+		var reached: Set[GSym] = Set.empty
+		var derivedSymbols = List[Pair[GSym, AppliedTrans]]()
+		var points: Set[CPoint] = Set.empty
 
-		val forNextStep: mutable.PriorityQueue[AppliedTrans] = mutable.PriorityQueue.empty(cheapTransformComeFirst)
+		val forNextStep: mutable.PriorityQueue[OrderedAppliedTrans] = mutable.PriorityQueue[OrderedAppliedTrans]()
 
 		val ignoreSet: Set[GSym] = query.query.foldLeft(Set[GSym]())((set, symbol) => set + symbol)
 		val root: CPoint = new CPoint(query.query)
@@ -47,12 +52,12 @@ class Derivation(val suffixAmt: SuffixAmt, val countOfResultsFromOneSentence: In
 			derivedSymbols = reachedByTransform.foldLeft(derivedSymbols)((l, v) => Pair(v, aTrans) :: l)
 
 			if (aTrans.level <= query.maxLevelOfTransform) {
-				forNextStep.enqueue(aTrans)
+				forNextStep.enqueue(OrderedAppliedTrans(aTrans))
 			}
 		}
 
 		while (points.size < query.maxCountOfGeneratedSentences && !forNextStep.isEmpty) {
-			val cheapestDerivation = forNextStep.dequeue()
+			val cheapestDerivation = forNextStep.dequeue().t
 			val current = cheapestDerivation.posTrans.child
 
 			for (pTrans : PosTrans <- getPossibleTrans(current, query.grammar)) {
@@ -68,7 +73,7 @@ class Derivation(val suffixAmt: SuffixAmt, val countOfResultsFromOneSentence: In
 				derivedSymbols = reachedByTransform.foldLeft(derivedSymbols)((l, v) => Pair(v, aTrans) :: l)
 
 				if (aTrans.level <= query.maxLevelOfTransform) {
-					forNextStep.enqueue(aTrans)
+					forNextStep.enqueue(OrderedAppliedTrans(aTrans))
 				}
 			}
 		}
