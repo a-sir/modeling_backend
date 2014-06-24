@@ -25,6 +25,7 @@ class Grammar(
 	def getSynRulesCount = synRules.rulesCount
 	def countOfSyms = syms.size
 
+
     def getSymbols(tokens: List[String]): List[GSym] = {
         tokens.foldLeft(List.empty[GSym])((a, b) => {
             val sym = syms.getSymbol(b)

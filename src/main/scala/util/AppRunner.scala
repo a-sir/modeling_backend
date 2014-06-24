@@ -6,6 +6,8 @@ package util
  */
 
 import akka.actor._
+import grammar.Grammar
+import grammar.derivation.Derivation
 import lemms.LemmatizerImpl
 import play.api.libs.json._
 
@@ -42,6 +44,13 @@ object AppRunner extends App {
     val system = ActorSystem("ModelingActorSystem", conf)
     val remoteActor = system.actorOf(Props[InterfaceActor], name = "InterfaceActor")
     remoteActor ! "Started"
+
+    val g = Grammar.createEnglishGrammar()
+    println("Grammar loaded")
+
+    val deriv = Derivation.createForDictionary(g)
+    println("Derivator is build")
+
 }
 
 class InterfaceActor extends Actor {
