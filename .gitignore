@@ -12,3 +12,5 @@ target/
 .idea_modules
 .ivy/
 .ivy2/
+.ensime
+.ensime_lucene/
