@@ -5,6 +5,8 @@ package util
  *         Date: 6/13/14
  */
 
+import java.util.concurrent._
+import java.util.Queue
 import akka.actor._
 import grammar.Grammar
 import grammar.derivation._
@@ -40,26 +42,26 @@ object AppRunner extends App {
       )
     }
 
-    val conf = com.typesafe.config.ConfigFactory.parseString(confStr(2552))
-    val system = ActorSystem("ModelingActorSystem", conf)
-    val remoteActor = system.actorOf(Props[InterfaceActor], name = "InterfaceActor")
-    remoteActor ! "Started"
+  val conf = com.typesafe.config.ConfigFactory.parseString(confStr(2552))
+  val system = ActorSystem("ModelingActorSystem", conf)
+  val remoteActor = system.actorOf(Props[InterfaceActor], name = "InterfaceActor")
+  remoteActor ! "Started"
 
-    val g = Grammar.createEnglishGrammar()
-    println("Grammar loaded")
+  val g = Grammar.createEnglishGrammar()
+  println("Grammar loaded")
 
-    val deriv = Derivation.createForDictionary(g)
-    println("Derivator is build")
+  val deriv = Derivation.createForDictionary(g)
+  println("Derivator is build")
 
-    val processor: Processor = new Processor(grammar = g, derivator = deriv)
-    println("Processor loaded")
-
+  val pool: ExecutorService = Executors.newSingleThreadExecutor()
+  val processor = new Processor(grammar = g, derivator = deriv)
+  pool.execute(processor)
+  println("Processor started")
 }
 
 class InterfaceActor extends Actor {
 
     lazy val lemm = LemmatizerImpl.create()
-    lazy val dontKeepUnknownWordforms = false
 
     def receive = {
         case msg: String =>
@@ -67,36 +69,29 @@ class InterfaceActor extends Actor {
             if (msg.startsWith("query:")) {
               processQuery(msg.substring(6))
             } else if (msg.startsWith("session_status:")) {
+              readProcessed
               sendStatusUpdate(msg.substring(15))
             }
     }
 
-    def sendStatusUpdate(sessionId: String) {
-      sender ! "status_update:" + AppRunner.getTaskStatus(sessionId).toString()
+  def readProcessed {
+
+    while (AppRunner.processor.processed.isEmpty()) {
+      var t3: Tuple3[String, String, String] = AppRunner.processor.processed.poll(5, TimeUnit.MICROSECONDS)
+      // TODO update map
     }
+  }
 
-    def processQuery(q: String) {
-        val json = Json.parse(q)
-        val query = (json \ "query").as[String]
-        val sessionId = (json \ "sessionId").as[String]
+  def sendStatusUpdate(sessionId: String) {
+    sender ! "status_update:" + AppRunner.getTaskStatus(sessionId).toString()
+  }
 
-        val l: List[String] = lemm.tokenizeAndLemmatize(query, dontKeepUnknownWordforms)
-
-        if (l.size > 0) {
-            AppRunner.tasks += sessionId -> Json.obj(
-                "orig_query" -> query,
-                "lemmatized_query" -> l.mkString(","),
-                "state" -> "lemmatized query"
-            )
-            println("Lemmatized correctly: " + AppRunner.tasks.get(sessionId))
-        } else {
-            AppRunner.tasks += sessionId -> Json.obj(
-                "orig_query" -> query,
-                "state" -> "failed",
-                "state_description" -> "failed lemmatization of query"
-            )
-            println("Lemmatization failed")
-        }
-        sendStatusUpdate(sessionId)
-    }
+  def processQuery(q: String) {
+    val json = Json.parse(q)
+    val query = (json \ "query").as[String]
+    val sessionId = (json \ "sessionId").as[String]
+    AppRunner.processor.requests.put("submit:" + sessionId + ":" + query)
+    AppRunner.tasks += sessionId -> Json.obj("orig_query" -> query, "state" -> "submitted")
+    sendStatusUpdate(sessionId)
+  }
 }
