@@ -7,7 +7,7 @@ package util
 
 import akka.actor._
 import grammar.Grammar
-import grammar.derivation.Derivation
+import grammar.derivation._
 import lemms.LemmatizerImpl
 import play.api.libs.json._
 
@@ -50,6 +50,9 @@ object AppRunner extends App {
 
     val deriv = Derivation.createForDictionary(g)
     println("Derivator is build")
+
+    val processor: Processor = new Processor(grammar = g, derivator = deriv)
+    println("Processor loaded")
 
 }
 
@@ -97,5 +100,3 @@ class InterfaceActor extends Actor {
         sendStatusUpdate(sessionId)
     }
 }
-
-

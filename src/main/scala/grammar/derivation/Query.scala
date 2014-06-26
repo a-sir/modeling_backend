@@ -6,7 +6,7 @@ import grammar._
  * @author A.Sirenko
  *          Date: 9/19/13
  */
-class Query(
+case class Query(
 		val query: List[GSym],
 		val grammar: Grammar,
 		val maxCountOfGeneratedSentences: Int,
