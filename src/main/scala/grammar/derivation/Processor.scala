@@ -47,15 +47,14 @@ class ProcessTask (
   val grammar: Grammar, val deriv: Derivation)
     extends Runnable {
   def run() = {
-    val res: Array[String] = Array(sessionId, "Failed")
+    val res: Array[String] = Array(sessionId, process)
     receivers.foreach {_ ! res}
   }
 
-  def process() {
+  def process(): String = {
     val syms = grammar.getSymbols(query.split(" ").toList)
-    val q: Query = new Query(syms, grammar, 1000, 5)
-    // prepare GSym from grammar, prepare query and send to deriv
-    // deriv.compute(query:Query)
-    println("Done")
+    val res = deriv.compute(new Query(syms, grammar, 1000, 5)).symbols.mkString(" ")
+    println(res)
+    res
   }
 }
