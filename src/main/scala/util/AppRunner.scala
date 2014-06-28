@@ -42,11 +42,6 @@ object AppRunner extends App {
       )
     }
 
-  val conf = com.typesafe.config.ConfigFactory.parseString(confStr(2552))
-  val system = ActorSystem("ModelingActorSystem", conf)
-  val remoteActor = system.actorOf(Props[InterfaceActor], name = "InterfaceActor")
-  remoteActor ! "Started"
-
   val g = Grammar.createEnglishGrammar()
   println("Grammar loaded")
 
@@ -57,6 +52,13 @@ object AppRunner extends App {
   val processor = new Processor(grammar = g, derivator = deriv)
   pool.execute(processor)
   println("Processor started")
+
+  val conf = com.typesafe.config.ConfigFactory.parseString(confStr(2552))
+  val system = ActorSystem("ModelingActorSystem", conf)
+  val remoteActor = system.actorOf(Props[InterfaceActor], name = "InterfaceActor")
+  remoteActor ! "Started"
+
+  // TODO shutdown pool
 }
 
 class InterfaceActor extends Actor {
