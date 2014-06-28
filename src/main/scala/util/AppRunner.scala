@@ -77,7 +77,6 @@ class InterfaceActor extends Actor {
     }
 
   def readProcessed {
-
     while (AppRunner.processor.processed.isEmpty()) {
       var t3: Tuple3[String, String, String] = AppRunner.processor.processed.poll(5, TimeUnit.MICROSECONDS)
       // TODO update map
@@ -94,6 +93,7 @@ class InterfaceActor extends Actor {
     val sessionId = (json \ "sessionId").as[String]
     AppRunner.processor.requests.put("submit:" + sessionId + ":" + query)
     AppRunner.tasks += sessionId -> Json.obj("orig_query" -> query, "state" -> "submitted")
+    println("Tasks after sumbission:" + AppRunner.tasks)
     sendStatusUpdate(sessionId)
   }
 }

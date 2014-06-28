@@ -19,8 +19,11 @@ class Processor(
 extends Runnable {
 
   override def run() = {
+    println("Processor started.")
     while (true) {
+      println("Wait for data from requests queue")
       val s: String = requests.take()
+      println("Take from requests queue: " + s)
       if (s.startsWith("submit:")) {
         val sessionQuery = s.substring(7)
         val del = sessionQuery.indexOf(":")
