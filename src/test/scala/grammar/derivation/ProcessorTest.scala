@@ -30,6 +30,7 @@ describe("A Processor") {
     val res: Tuple3[String, String, String] = processor.processed.poll(15, TimeUnit.SECONDS)
     assert(res != null && sessionId.equals(res._1) && query.equals(res._2))
     assert(res._3.length() > 0)
+    pool.shutdown()
   }
 
 }
