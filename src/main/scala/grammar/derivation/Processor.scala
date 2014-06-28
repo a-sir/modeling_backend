@@ -11,11 +11,12 @@ import grammar.Grammar
   Receives: sessionId, and settings;
   */
 
+case class Result(val sessionId: String, val query: String, val result: String)
+
 class Processor(
   val grammar: Grammar, val derivator: Derivation,
-  val requests: BlockingQueue[String] = new LinkedBlockingQueue[String](100),
-  val processed: BlockingQueue[Tuple3[String, String, String]] = new LinkedBlockingQueue[Tuple3[String, String, String]](100)
-  )
+  val requests: BlockingQueue[String] = new LinkedBlockingQueue(100),
+  val listener: (Result) => Unit)
 extends Runnable {
 
   override def run() = {
@@ -32,7 +33,9 @@ extends Runnable {
 
         val syms = grammar.getSymbols(query.split(" ").toList)
         val derivedTerms = derivator.compute(new Query(syms, grammar, 1000, 5)).symbols.mkString(" ")
-        processed.add(Tuple3(sessionId, query, derivedTerms))
+        val res = Result(sessionId, query, derivedTerms)
+        println("Submit to listener: " + res)
+        listener(res)
       } else {
         println("Unknown message: " +s)
       }
