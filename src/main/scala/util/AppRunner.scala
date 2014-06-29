@@ -44,11 +44,17 @@ object AppRunner extends App {
   }
 
   def applyProcessed(res: Result) {
+    println("Current tasks: " + tasks)
     tasks.get(res.sessionId) match {
       case None => println("[" + res.sessionId + ":" + res.query + "] was removed from tasks already. Ignore results")
       case opt: Some[JsObject] =>
         val o = opt.get
-        tasks += res.sessionId -> (o + ("derivation_result" -> JsString(res.result)) + ("state" -> JsString("derived")))
+        println("For sessionId " + res.sessionId + " there is an entry: " + o)
+        tasks += res.sessionId -> (
+          o - "state" +
+            ("derivation_result" -> JsString(java.net.URLEncoder.encode(res.result.asTableString(), "UTF-8"))) +
+            ("state" -> JsString("derived"))
+        )
         println("Tasks after getting processing results:" + AppRunner.tasks)
         sendStatusUpdate(res.sessionId)
     }

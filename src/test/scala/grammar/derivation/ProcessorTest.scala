@@ -32,7 +32,8 @@ describe("A Processor") {
       Thread.sleep(100)
     }
     assert(res != null && sessionId.equals(res.sessionId) && query.equals(res.query))
-    assert(res.result.length() > 0)
+    assert(res.result.reached.size > 0)
+    println(res.result.asTableString())
     pool.shutdown()
   }
 

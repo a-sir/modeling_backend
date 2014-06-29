@@ -11,7 +11,7 @@ import grammar.Grammar
   Receives: sessionId, and settings;
   */
 
-case class Result(val sessionId: String, val query: String, val result: String)
+case class Result(val sessionId: String, val query: String, val result: DerivationResult)
 
 class Processor(
   val grammar: Grammar, val derivator: Derivation,
@@ -32,9 +32,8 @@ extends Runnable {
         val query = sessionQuery.substring(del + 1)
 
         val syms = grammar.getSymbols(query.split(" ").toList)
-        val derivedTerms = derivator.compute(new Query(syms, grammar, 1000, 5)).symbols.mkString(" ")
-        val res = Result(sessionId, query, derivedTerms)
-        println("Submit to listener: " + res)
+        val res = Result(sessionId, query, derivator.compute(new Query(syms, grammar, 1000, 5)))
+        println("Submit to listener results for: " + res.sessionId)
         listener(res)
       } else {
         println("Unknown message: " +s)
