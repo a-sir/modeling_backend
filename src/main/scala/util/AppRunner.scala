@@ -48,8 +48,9 @@ object AppRunner extends App {
       case None => println("[" + res.sessionId + ":" + res.query + "] was removed from tasks already. Ignore results")
       case opt: Some[JsObject] =>
         val o = opt.get
-        tasks += res.sessionId -> (o + ("derivation_result" -> JsString(res.result)))
+        tasks += res.sessionId -> (o + ("derivation_result" -> JsString(res.result)) + ("state" -> JsString("derived")))
         println("Tasks after getting processing results:" + AppRunner.tasks)
+        sendStatusUpdate(res.sessionId)
     }
   }
 
@@ -59,10 +60,20 @@ object AppRunner extends App {
     val sessionId = (json \ "sessionId").as[String]
     AppRunner.processor.requests.put("submit:" + sessionId + ":" + query)
     AppRunner.tasks += sessionId -> Json.obj("orig_query" -> query, "state" -> "submitted")
-    // TODO if remote actor initiate request, then I don't need this map
     AppRunner.sessionToRemoteActor += sessionId -> sender
     println("Tasks after sumbission:" + AppRunner.tasks)
     sessionId
+  }
+
+  def sendStatusUpdate(sessionId: String) {
+    sessionToRemoteActor.get(sessionId) match {
+      case None => println("Don't know remote actor to send " + sessionId);
+      case v: Some[ActorRef] =>
+        val actorRef: ActorRef = v.get
+        val status = getTaskStatus(sessionId)
+        println("Send status update to remote actor" + actorRef)
+        actorRef ! "status_update:" + status
+    }
   }
 
   val g = Grammar.createEnglishGrammar()
@@ -93,14 +104,10 @@ class InterfaceActor extends Actor {
       println("InterfaceActor received message " + msg)
       if (msg.startsWith("query:")) {
         val sessionId = AppRunner.submitQuery(msg.substring(6), sender)
-        sendStatusUpdate(sessionId)
+        AppRunner.sendStatusUpdate(sessionId)
       } else if (msg.startsWith("session_status:")) {
-        sendStatusUpdate(msg.substring(15))
+        AppRunner.sendStatusUpdate(msg.substring(15))
       }
-  }
-
-  def sendStatusUpdate(sessionId: String) {
-    sender ! "status_update:" + AppRunner.getTaskStatus(sessionId).toString()
   }
 
 }
