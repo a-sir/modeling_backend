@@ -10,23 +10,32 @@ import play.api.libs.json._
  */
 class DerivationResult(val reached: List[Pair[GSym, AppliedTrans]]) {
   lazy val symbols: Set[GSym] = reached.foldLeft(Set[GSym]())((s, v) => s + v._1)
-  lazy val aggrSyms: Map[GSym, Double] = {
-    var m: Map[GSym, Double] = Map.empty
+  lazy val aggrSyms: Map[GSym, Pair[Double, List[String]]] = {
+    var m: Map[GSym, Pair[Double, List[String]]] = Map.empty
     for(v <- reached) {
-      val base = m.get(v._1) match {
-        case x: Some[Double] => x.get
-        case None => 0
+      val base: Pair[Double, List[String]] = m.get(v._1) match {
+        case x: Some[Pair[Double, List[String]]] => x.get
+        case None => Pair(0, List.empty)
       }
-      m += (v._1 -> (v._2.reachedCost + base))
+      m += (v._1 -> Pair(base._1 + v._2.reachedCost, v._2.chainDescription :: base._2))
     }
     m
   }
 
   def asTableString(): String = {
-    aggrSyms.foldLeft(new StringBuilder())((a, b) =>
-      a.append("\n").append(b._1.getKey()).append("\t")
-        .append(b._1.name).append("\t")
-        .append(b._2)
-    ).toString
+    println("Count of aggregated syms: " + aggrSyms.size)
+    var i: Int = 0;
+    val sb = new StringBuilder()
+    for (e <- aggrSyms.seq) {
+      println(i)
+      i+=1
+      sb.append("\n").append(e._1.getKey()).append("\t")
+        .append(e._1.name).append("\t")
+        .append(e._2._1)
+      sb
+    }
+    sb.toString
   }
+
+  override def toString: String = asTableString()
 }

@@ -44,15 +44,17 @@ object AppRunner extends App {
   }
 
   def applyProcessed(res: Result) {
-    println("Current tasks: " + tasks)
+    println("Current tasks: " + tasks + " received processing results" + res.result.symbols)
     tasks.get(res.sessionId) match {
       case None => println("[" + res.sessionId + ":" + res.query + "] was removed from tasks already. Ignore results")
       case opt: Some[JsObject] =>
         val o = opt.get
-        println("For sessionId " + res.sessionId + " there is an entry: " + o)
+        println("For sessionId " + res.sessionId + " there was an entry: " + o + "serialize " + res.result.symbols.size + " reached symbols")
+        val derivSerialized = java.net.URLEncoder.encode(res.result.asTableString(), "UTF-8")
+        println("Serialized to String:\n" + derivSerialized)
         tasks += res.sessionId -> (
           o - "state" +
-            ("derivation_result" -> JsString(java.net.URLEncoder.encode(res.result.asTableString(), "UTF-8"))) +
+            ("derivation_result" -> JsString(derivSerialized)) +
             ("state" -> JsString("derived"))
         )
         println("Tasks after getting processing results:" + AppRunner.tasks)
@@ -77,7 +79,7 @@ object AppRunner extends App {
       case v: Some[ActorRef] =>
         val actorRef: ActorRef = v.get
         val status = getTaskStatus(sessionId)
-        println("Send status update to remote actor" + actorRef)
+        println("Send status " + status + " to remote actor" + actorRef)
         actorRef ! "status_update:" + status
     }
   }

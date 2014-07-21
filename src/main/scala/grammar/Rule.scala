@@ -8,11 +8,12 @@ import utils.Keyable
  */
 class Rule(val key: Int, val left: List[GSym], val right: List[GSym], val cost: Double) extends Keyable[Integer] {
 
-	override def toString = "left: " + left + ", right: " + right + "cost: " + cost
+  override def toString = "left: " + left + ", right: " + right + "cost: " + cost
+  def leftNames (delimeter: String) = left.map(_.name).mkString(delimeter)
+  def rightNames(delimeter: String) = right.map(_.name).mkString(delimeter)
+  override def getKey: Integer = key
 
-    override def getKey: Integer = key
-
-    lazy val leftKeys: List[Integer] = left.foldRight(List.empty[Integer]) ((a, b) => a.key :: b)
+  lazy val leftKeys: List[Integer] = left.foldRight(List.empty[Integer]) ((a, b) => a.key :: b)
 }
 
 object Rule {

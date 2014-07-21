@@ -8,4 +8,6 @@ import utils.Keyable
  */
 case class GSym(key: Int, name: String) extends Keyable[Integer]{
     override def getKey: Integer = key
+
+  override def toString = name
 }
