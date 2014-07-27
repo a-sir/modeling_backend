@@ -177,7 +177,7 @@ object Derivation {
 
   def createForDictionary(g: Grammar): Derivation = {
 
-    val amt: AmtDictionary[Keyable[Integer]] = new AmtDictionary[Keyable[Integer]](g.syms.getSymbolsDictionary) {
+    val amt: AmtDictionary[Keyable[Int]] = new AmtDictionary[Keyable[Int]](g.syms.getSymbolsDictionary) {
       override def getName(p1: Int): String = map.get(p1).toString
     }
     val suffixAmt: SuffixAmt = new SuffixAmt(amt, SuffixAmt.defaultCosts(), 3)

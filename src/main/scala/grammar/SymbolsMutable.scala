@@ -19,8 +19,8 @@ class SymbolsMutable {
 
 	def getSymbol(name: String): Option[GSym] = nameToSymbol.get(name)
 
-    def getSymbolsDictionary: java.util.HashMap[Integer, Keyable[Integer]] = {
-        val map = new util.HashMap[Integer, Keyable[Integer]]()
+    def getSymbolsDictionary: java.util.HashMap[Integer, Keyable[Int]] = {
+        val map = new util.HashMap[Integer, Keyable[Int]]()
         for (gsym <- keyToSymbol.values) {
             map.put(gsym.getKey, gsym)
         }
