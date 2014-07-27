@@ -33,7 +33,7 @@ describe("A Processor") {
     }
     assert(res != null && sessionId.equals(res.sessionId) && query.equals(res.query))
     assert(res.result.reached.size > 0)
-    println(res.result.asTableString())
+    println(res.result.asTableString)
     pool.shutdown()
   }
 

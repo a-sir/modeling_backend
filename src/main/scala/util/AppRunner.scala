@@ -50,7 +50,7 @@ object AppRunner extends App {
       case opt: Some[JsObject] =>
         val o = opt.get
         println("For sessionId " + res.sessionId + " there was an entry: " + o + "serialize " + res.result.symbols.size + " reached symbols")
-        val derivSerialized = java.net.URLEncoder.encode(res.result.asTableString(), "UTF-8")
+        val derivSerialized = java.net.URLEncoder.encode(res.result.asTableString, "UTF-8")
         println("Serialized to String:\n" + derivSerialized)
         tasks += res.sessionId -> (
           o - "state" +
