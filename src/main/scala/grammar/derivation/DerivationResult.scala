@@ -12,20 +12,16 @@ import play.api.libs.json._
 case class AggrDerivSym(sym: GSym, invCost: Double, chains: List[String]) {
   def toJson: JsObject = {
     Json.obj(
-      "symKey" -> sym.getKey, "symName" -> sym.name,
-      "invCost" -> invCost,
-      "chains" -> chains
+      "gsym" -> sym.toJson, "invCost" -> invCost, "chains" -> chains
     )
   }
 
 }
 
 object AggrDerivSym {
+
   def fromJson(obj: JsObject): AggrDerivSym = {
-    val sym: GSym = new GSym(
-      obj.\("symKey").as[JsNumber].value.intValue(),
-      obj.\("symName").as[JsString].value
-    )
+    val sym: GSym = GSym.fromJson(obj.\("gsym").as[JsObject])
     val chains: Seq[JsValue] = obj.\("chains").as[JsArray].value
     var chs:List[String] = List[String]()
     chains.seq.foreach(a => chs = a.asInstanceOf[JsString].value :: chs)
@@ -35,19 +31,7 @@ object AggrDerivSym {
   }
 }
 
-class DerivationResult(val reached: List[Pair[GSym, AppliedTrans]]) {
-  lazy val symbols: Set[GSym] = reached.foldLeft(Set[GSym]())((s, v) => s + v._1)
-  lazy val aggrSyms: Map[GSym, AggrDerivSym] = {
-    var m: Map[GSym, AggrDerivSym] = Map.empty
-//    for(v <- reached) {
-//      val base: AggrDerivSym = m.get(v._1) match {
-//        case x: Some[AggrDerivSym] => x.get
-//        case None => AggrDerivSym(v._1, 0, List.empty)
-//      }
-//      m += (v._1 -> AggrDerivSym(base._1, v._2.reachedCost, v._2.chainDescription :: base._2))
-//    }
-    m
-  }
+case class DerivationResult(val aggrSyms: Map[GSym, AggrDerivSym]) {
 
   def asTableString: String = {
     println("Count of aggregated syms: " + aggrSyms.size)
@@ -59,15 +43,40 @@ class DerivationResult(val reached: List[Pair[GSym, AppliedTrans]]) {
 //    }
     sb.toString
   }
-
-  def convertReachedSymsToJson(syms: Seq[AggrDerivSym]): JsValue = {
-    JsString("a")
-    //Json.toJson(
-          //syms.map { t =>
-          //    Map("symname" -> t.sym, "tweet" -> t.tweet, "date" -> t.date)
-          //}
-    //  )
+  def toJson: JsObject = {
+    var list: List[JsObject] = List[JsObject]()
+    for (obj <- aggrSyms.values) {
+      list = obj.toJson :: list
+    }
+    Json.obj("syms" -> list)
   }
 
   override def toString: String = asTableString
+}
+
+object DerivationResult {
+
+  def fromJson(obj: JsObject): DerivationResult = {
+    val syms: Seq[JsValue] = obj.\("syms").as[JsArray].value
+    var chs: List[AggrDerivSym] = List[AggrDerivSym]()
+    syms.seq.foreach(a => chs = AggrDerivSym.fromJson(a.asInstanceOf[JsObject]) :: chs)
+    var m: Map[GSym, AggrDerivSym] = Map.empty
+    for (v: AggrDerivSym <- chs) {
+      m = m + (v.sym -> v)
+    }
+    DerivationResult(m)
+  }
+
+  def build(reached: List[Pair[GSym, AppliedTrans]]): DerivationResult = {
+      var m: Map[GSym, AggrDerivSym] = Map.empty
+      for((sym: GSym, trans: AppliedTrans) <- reached) {
+        val base: AggrDerivSym = m.get(sym) match {
+          case x: Some[AggrDerivSym] => x.get
+          case None => AggrDerivSym(sym, 0, List[String]())
+        }
+        m += (sym -> AggrDerivSym(base.sym, trans.reachedCost, trans.chainDescription :: base.chains))
+      }
+      new DerivationResult(m)
+  }
+
 }

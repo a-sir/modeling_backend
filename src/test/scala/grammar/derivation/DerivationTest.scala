@@ -17,8 +17,8 @@ class DerivationTest extends FunSpec {
 
       val deriv = Derivation.createForStrings
       val reached = deriv.compute(new Query(sentence, grammar, 5, 3))
-      assert(!reached.symbols.isEmpty)
-      val reachedLetters = reached.symbols.foldLeft(Set[String]())((s, v) => s + v.name)
+      assert(!reached.aggrSyms.keys.isEmpty)
+      val reachedLetters = reached.aggrSyms.keys.foldLeft(Set[String]())((s, v) => s + v.name)
       assert(TestUtils.areSame(reachedLetters, Set("b", "d")))
       val reachedSyms = reached.aggrSyms
       for ((sym: GSym, derivDetails: AggrDerivSym) <- reachedSyms) {
@@ -35,8 +35,8 @@ class DerivationTest extends FunSpec {
 
       val deriv = Derivation.createForStrings
       val reached = deriv.compute(new Query(sentence, grammar, 5, 3))
-      assert(!reached.symbols.isEmpty)
-      val reachedLetters = reached.symbols.foldLeft(Set[String]())((s, v) => s + v.name)
+      assert(!reached.aggrSyms.keys.isEmpty)
+      val reachedLetters = reached.aggrSyms.keys.foldLeft(Set[String]())((s, v) => s + v.name)
       assert(TestUtils.areSame(reachedLetters, Set("b", "d")))
       val reachedSyms = reached.aggrSyms
       for ((sym: GSym, derivDetails: AggrDerivSym) <- reachedSyms) {
@@ -53,9 +53,9 @@ class DerivationTest extends FunSpec {
             val querySyms = grammar.getSymbols(grammar.lemmatizer.tokenizeAndLemmatize("Russian apple", false))
 
             val result = deriv.compute(new Query(querySyms, grammar, 10, 5))
-            assert(result.symbols.size > 12 && result.symbols.size < 25)
+            assert(result.aggrSyms.keys.size > 12 && result.aggrSyms.keys.size < 25)
 
-            val names = result.symbols.foldLeft(Set.empty[String])((a,b)=> a + b.name)
+            val names = result.aggrSyms.keys.foldLeft(Set.empty[String])((a,b)=> a + b.name)
             val shouldBe = List(
                     "red", "core", "peach", "food", "worm", "pie", "green", "crisp",
                     "orchard apple tree", "Malus pumila"
