@@ -44,12 +44,12 @@ object AppRunner extends App {
   }
 
   def applyProcessed(res: Result) {
-    println("Current tasks: " + tasks + " received processing results" + res.result.symbols)
+    println("Current tasks: " + tasks + " received processing results" + res.result.aggrSyms.size)
     tasks.get(res.sessionId) match {
       case None => println("[" + res.sessionId + ":" + res.query + "] was removed from tasks already. Ignore results")
       case opt: Some[JsObject] =>
         val o = opt.get
-        println("For sessionId " + res.sessionId + " there was an entry: " + o + "serialize " + res.result.symbols.size + " reached symbols")
+        println("For sessionId " + res.sessionId + " there was an entry: " + o + "serialize " + res.result.aggrSyms.size + " reached symbols")
         val derivSerialized = java.net.URLEncoder.encode(res.result.asTableString, "UTF-8")
         println("Serialized to String:\n" + derivSerialized)
         tasks += res.sessionId -> (
