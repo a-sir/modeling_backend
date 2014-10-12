@@ -67,14 +67,26 @@ object DerivationResult {
     DerivationResult(m)
   }
 
-  def build(reached: List[Pair[GSym, AppliedTrans]]): DerivationResult = {
+  def build(reached: List[Pair[GSym, AppliedTrans]], limit: Int): DerivationResult = {
+    // keep top N items by reachedCost
+    var syms: Map[GSym, List[AppliedTrans]] = Map.empty
+    for((sym: GSym, trans: AppliedTrans) <- reached) {
+      val base: List[AppliedTrans] = syms.get(sym) match {
+        case x: Some[List[AppliedTrans]] => x.get
+        case None => List()
+      }
+      syms += (sym -> (trans :: base))
+    }
+    val topSyms: List[GSym] = syms.toList.sortBy(_._2.foldLeft(0.0)((a,b)=> b.reachedCost + a)).slice(0, Math.min(limit, syms.size)).map(_._1)
+    println("Taken top " + topSyms.length + " GSym from total " + syms.size)
       var m: Map[GSym, AggrDerivSym] = Map.empty
-      for((sym: GSym, trans: AppliedTrans) <- reached) {
-        val base: AggrDerivSym = m.get(sym) match {
-          case x: Some[AggrDerivSym] => x.get
-          case None => AggrDerivSym(sym, 0, List[String]())
+      for(sym: GSym <- topSyms) {
+        var base: AggrDerivSym = new AggrDerivSym(sym, 0, List[String]())
+        for (trans: AppliedTrans <- syms.get(sym).get) {
+          println(trans.chainDescription)
+          base = AggrDerivSym(sym, trans.reachedCost + base.invCost, trans.chainDescription :: base.chains)
         }
-        m += (sym -> AggrDerivSym(base.sym, trans.reachedCost, trans.chainDescription :: base.chains))
+        m += (sym -> base)
       }
       new DerivationResult(m)
   }

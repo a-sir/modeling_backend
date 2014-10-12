@@ -10,5 +10,6 @@ case class Query(
 		val query: List[GSym],
 		val grammar: Grammar,
 		val maxCountOfGeneratedSentences: Int,
+		val maxCountOfDerivedSymbols: Int,
 		val maxLevelOfTransform: Int) {
 }

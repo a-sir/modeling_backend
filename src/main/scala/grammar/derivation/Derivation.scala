@@ -77,7 +77,8 @@ class Derivation(val suffixAmt: SuffixAmt, val countOfResultsFromOneSentence: In
 	}
       }
     }
-    DerivationResult.build(derivedSymbols)
+    println("Compose derivation results for " + derivedSymbols.size + "symbols")
+    DerivationResult.build(derivedSymbols, query.maxCountOfDerivedSymbols)
   }
 
   private def composeNextAppliedTransform(parentTrans: AppliedTrans, posTransToApply: PosTrans): AppliedTrans = {

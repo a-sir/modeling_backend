@@ -54,7 +54,7 @@ case class AppliedTrans(
     var prev = parent
     while (!prev.isEmpty) {
       desc = prev.get.posTrans.describe :: desc
-      prev = parent.get.parent
+      prev = prev.get.parent
     }
     desc.mkString(";")
   }
