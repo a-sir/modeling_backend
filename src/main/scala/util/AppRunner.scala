@@ -23,6 +23,7 @@ object AppRunner extends App {
   "    netty.tcp {\n" +
   "      hostname = \"127.0.0.1\"\n" +
   "      port = " + port + "\n" +
+  "      maximum-frame-size = 1024000\n" +
   "    }\n" +
   "  }" +
   "\n" +
@@ -50,7 +51,7 @@ object AppRunner extends App {
       case opt: Some[JsObject] =>
         val o = opt.get
         println("For sessionId " + res.sessionId + " there was an entry: " + o + "serialize " + res.result.aggrSyms.size + " reached symbols")
-        val derivSerialized = java.net.URLEncoder.encode(res.result.asTableString, "UTF-8")
+        val derivSerialized = java.net.URLEncoder.encode(res.result.toJson.toString, "UTF-8")
         println("Serialized to String:\n" + derivSerialized)
         tasks += res.sessionId -> (
           o - "state" +
@@ -67,6 +68,7 @@ object AppRunner extends App {
     val query = (json \ "query").as[String]
     val sessionId = (json \ "sessionId").as[String]
     AppRunner.processor.requests.put("submit:" + sessionId + ":" + query)
+    println(query + " submitted to processor")    
     AppRunner.tasks += sessionId -> Json.obj("orig_query" -> query, "state" -> "submitted")
     AppRunner.sessionToRemoteActor += sessionId -> sender
     println("Tasks after sumbission:" + AppRunner.tasks)
@@ -79,7 +81,7 @@ object AppRunner extends App {
       case v: Some[ActorRef] =>
         val actorRef: ActorRef = v.get
         val status = getTaskStatus(sessionId)
-        println("Send status " + status + " to remote actor" + actorRef)
+        println("Send status of" + sessionId + " to remote actor" + actorRef)
         actorRef ! "status_update:" + status
     }
   }
