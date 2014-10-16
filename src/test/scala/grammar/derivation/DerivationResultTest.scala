@@ -1,6 +1,7 @@
 package grammar.derivation
 
 import grammar.GSym
+import play.api.libs.json._
 import org.scalatest.FunSpec
 
 /**
@@ -8,6 +9,16 @@ import org.scalatest.FunSpec
  *          Date: 7/27/14
  */
 class DerivationResultTest extends FunSpec {
+    
+  describe("An DerivationResult") {
+      
+      it("should be parsed from string") {
+          val s: String = "{ \"syms\" : [    { \"gsym\" : { \"key\" : 953, \"name\" : \"sell\" }, \"invCost\" : 4.493867557720584, \"chains\" : [ \"(h)-[0.4117647058823529]->(money)=>[money];(money)-[0.1271186440677966]->(spend)=>[spend];(spend)-[0.10606060606060606]->(buy)=>[buy];(buy)-[0.0]->(grease one's palms)=>[grease one's palms]\", \"(h)-[0.4117647058823529]->(money)=>[money];(money)-[0.1271186440677966]->(spend)=>[spend];(spend)-[0.10606060606060606]->(buy)=>[buy];(buy)-[0.012738853503184714]->(cash)=>[cash]\", \"(h)-[0.4117647058823529]->(money)=>[money];(money)-[0.1271186440677966]->(spend)=>[spend];(spend)-[0.10606060606060606]->(buy)=>[buy];(buy)-[0.15286624203821655]->(purchase)=>[purchase]\", \"(h)-[0.4117647058823529]->(money)=>[money];(money)-[0.1271186440677966]->(spend)=>[spend];(spend)-[0.10606060606060606]->(buy)=>[buy];(buy)-[0.03821656050955414]->(pay)=>[pay]\", \"(h)-[0.4117647058823529]->(money)=>[money];(money)-[0.1271186440677966]->(spend)=>[spend];(spend)-[0.10606060606060606]->(buy)=>[buy];(buy)-[0.01910828025477707]->(s ore)=>[s ore]\", \"(h)-[0.4117647058823529]->(money)=>[money];(money)-[0.1271186440677966]->(spend)=>[spend];(spend)-[0.10606060606060606]->(buy)=>[buy];(buy)-[0.4012738853503185]->(sell)=>[sell]\" ] }, { \"gsym\" : { \"key\" : 203, \"name\" : \"pay\" }, \"invCost\" : 2.783597480093978, \"chains\" : [ \"(h)-[0.4117647058823529]->(money)=>[money];(money)-[0.1271186440677966]->(spend)=>[spend];(spend)-[0.10606060606060606]->(buy)=>[buy];(buy)-[0.0]->(grease one's palms)=>[grease one's palms]\", \"(h)-[0.4117647058823529]->(money)=>[money];(money)-[0.1271186440677966]->(spend)=>[spend];(spend)-[0.10606060606060606]->(buy)=>[buy];(buy)-[0.012738853503184714]->(cash)=>[cash]\", \"(h)-[0.4117647058823529]->(money)=>[money];(money)-[0.1271186440677966]->(spend)=>[spend];(spend)-[0.10606060606060606]->(buy)=>[buy];(buy)-[0.15286624203821655]->(purchase)=>[purchase]\", \"(h)-[0.4117647058823529]->(money)=>[money];(money)-[0.1271186440677966]->(spend)=>[spend];(spend)-[0.10606060606060606]->(buy)=>[buy];(buy)-[0.03821656050955414]->(pay)=>[pay]\" ] }, { \"gsym\" : { \"key\" : 373736, \"name\" : \"grease one's palms\" }, \"invCost\" : 0.6449439560107556, \"chains\" : [ \"(h)-[0.4117647058823529]->(money)=>[money];(money)-[0.1271186440677966]->(spend)=>[spend];(spend)-[0.10606060606060606]->(buy)=>[buy];(buy)-[0.0]->(grease one's palms)=>[grease one's palms]\" ] } ]}"
+          val obj = Json.parse(s).as[JsObject];
+          val res: DerivationResult = DerivationResult.fromJson(obj);
+          assert(res.aggrSyms.size == 3)
+      }
+  }
 
   describe("An AggrDerivSym") {
 
