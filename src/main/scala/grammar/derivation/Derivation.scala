@@ -1,7 +1,6 @@
 package grammar.derivation
 
 import java.util.Comparator
-import java.util.function.{ToDoubleFunction, ToIntFunction, ToLongFunction, Function}
 
 import grammar.{Rule, GSym, Grammar}
 import scala.collection.mutable
