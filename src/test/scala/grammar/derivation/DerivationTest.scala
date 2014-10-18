@@ -69,9 +69,11 @@ class DerivationTest extends FunSpec {
             val querySyms = grammar.getSymbols(grammar.lemmatizer.tokenizeAndLemmatize("house with girls", false))
 
             val result = deriv.compute(new Query(querySyms, grammar, 200, 50, 3))
-            assert(result.aggrSyms.keys.size > 12)
+            assert(result.aggrSyms.size == 50)
 
             val names = result.aggrSyms.keys.foldLeft(Set.empty[String])((a,b)=> a + b.name)
+            assert(!names.contains("house") && !names.contains("girls") && !names.contains("with"))
+            assert(names.contains("boy"))
         }
     }
 }

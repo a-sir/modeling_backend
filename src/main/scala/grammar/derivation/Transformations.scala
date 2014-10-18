@@ -48,8 +48,8 @@ case class AppliedTrans(
 		reachedCost: Double, parent: Option[AppliedTrans],
 		level: Int, posTrans: PosTrans, root: CPoint, hist: List[History]
 ) {
-
-  def chainDescription(): String = {
+    
+  override def toString(): String = {
     var desc: List[String] = List(posTrans.describe)
     var prev = parent
     while (!prev.isEmpty) {

@@ -30,9 +30,8 @@ extends Runnable {
         val del = sessionQuery.indexOf(":")
         val sessionId = sessionQuery.substring(0, del);
         val query = sessionQuery.substring(del + 1)
-
-        val syms = grammar.getSymbols(query.split(" ").toList)
-        val res = Result(sessionId, query, derivator.compute(new Query(syms, grammar, 200, 3, 3)))
+        val syms = grammar.getSymbols(grammar.lemmatizer.tokenizeAndLemmatize(query, false))
+        val res = Result(sessionId, query, derivator.compute(new Query(syms, grammar, 200, 10, 3)))
         println("Submit to listener results for: " + res.sessionId)
         listener(res)
       } else {

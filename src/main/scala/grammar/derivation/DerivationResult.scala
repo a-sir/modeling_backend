@@ -68,26 +68,26 @@ object DerivationResult {
   }
 
   def build(reached: List[Pair[GSym, AppliedTrans]], limit: Int): DerivationResult = {
-    // keep top N items by reachedCost
-    var syms: Map[GSym, List[AppliedTrans]] = Map.empty
-    for((sym: GSym, trans: AppliedTrans) <- reached) {
-      val base: List[AppliedTrans] = syms.get(sym) match {
-        case x: Some[List[AppliedTrans]] => x.get
-        case None => List()
+    var symsWeight: Map[GSym, Double] = Map.empty
+    for((sym: GSym, trans: AppliedTrans) <- reached) {      
+      val baseWeight: Double = symsWeight.get(sym) match {
+        case x: Some[Double] => x.get
+        case None => 0
       }
-      Console.println(sym + " chain" + trans.chainDescription)
-      syms += (sym -> (trans :: base))
+      symsWeight += (sym -> (trans.reachedCost + baseWeight))
     }
-    val topSyms: List[GSym] = syms.toList.sortBy(_._2.foldLeft(0.0)((a,b)=> b.reachedCost + a)).slice(0, Math.min(limit, syms.size)).map(_._1)
-    val filteredMap: Map[GSym, List[AppliedTrans]] = syms.filterKeys((s: GSym) => topSyms.contains(s))
-    println("Taken top " + filteredMap.size + " GSym from total " + syms.size)
+
+    val sortedSyms: List[(GSym, Double)] = symsWeight.toList.sortBy(-1 * _._2)
     var m: Map[GSym, AggrDerivSym] = Map.empty
-    for((sym: GSym, transes: List[AppliedTrans]) <- filteredMap) {
-      var base: AggrDerivSym = new AggrDerivSym(sym, 0, List[String]())
-      for (t: AppliedTrans <- transes) {
-        base = AggrDerivSym(sym, t.reachedCost + base.invCost, t.chainDescription :: base.chains)
-      }
-      m += (sym -> base)
+    val topSyms: Set[GSym] = sortedSyms.slice(0, Math.min(limit, symsWeight.size)).foldLeft(Set.empty[GSym])((a,b)=> a + b._1)
+    for (s: GSym <- topSyms) {
+        var invCost: Double = 0;
+        var chains: List[String] = List();
+        for (t: AppliedTrans <- reached.filter(_._1 == s).map(_._2)) {
+            invCost += t.reachedCost
+            chains = t.toString :: chains
+        }
+        m += (s -> AggrDerivSym(s, invCost, chains))
     }
     new DerivationResult(m)
   }
