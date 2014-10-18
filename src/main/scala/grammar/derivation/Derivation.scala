@@ -26,7 +26,6 @@ class Derivation(val suffixAmt: SuffixAmt, val countOfResultsFromOneSentence: In
 
   def compute(query: Query): DerivationResult = {
     posTransCached = Map.empty
-    var reached: Set[GSym] = Set.empty
     var derivedSymbols = List[Pair[GSym, AppliedTrans]]()
     var points: Set[CPoint] = Set.empty
 
@@ -39,43 +38,37 @@ class Derivation(val suffixAmt: SuffixAmt, val countOfResultsFromOneSentence: In
     val initialHistory: List[History] = History.initialHistory(query.query.length)
 
     for (pTrans : PosTrans <- getPossibleTrans(root, query.grammar)) {
-      val aTrans = new AppliedTrans(
-	pTrans.rule.cost, Option.empty, 1, pTrans, root, History.buildHistory(initialHistory, pTrans)
-      )
+        val aTrans = new AppliedTrans(pTrans.rule.cost, Option.empty, 1, pTrans, root, History.buildHistory(initialHistory, pTrans))
 
-      points = points + pTrans.child
-      val reachedByTransform: Set[GSym] = pTrans.child.sentence.foldLeft(Set[GSym]())(
-	(s, v) => if (ignoreSet.contains(v)) s else s + v
-      )
+        points = points + pTrans.child
+        val reachedByTransform: Set[GSym] = pTrans.child.sentence
+                .foldLeft(Set[GSym]())((s, v) => if (ignoreSet.contains(v)) s else s + v)
 
-      reached = reachedByTransform.foldLeft(reached)((s, v) => s + v)
-      derivedSymbols = reachedByTransform.foldLeft(derivedSymbols)((l, v) => Pair(v, aTrans) :: l)
+        derivedSymbols = reachedByTransform.foldLeft(derivedSymbols)((l, v) => Pair(v, aTrans) :: l)
 
-      if (aTrans.level <= query.maxLevelOfTransform) {
-	forNextStep.enqueue(OrderedAppliedTrans(aTrans))
-      }
+        if (aTrans.level <= query.maxLevelOfTransform) {
+            forNextStep.enqueue(OrderedAppliedTrans(aTrans))
+        }
     }
 
     while (points.size < query.maxCountOfGeneratedSentences && !forNextStep.isEmpty) {
-      val cheapestDerivation = forNextStep.dequeue().t
-      val current = cheapestDerivation.posTrans.child
+        val cheapestDerivation = forNextStep.dequeue().t
+        val current = cheapestDerivation.posTrans.child
 
-      for (pTrans : PosTrans <- getPossibleTrans(current, query.grammar)) {
+        for (pTrans : PosTrans <- getPossibleTrans(current, query.grammar)) {
+            val aTrans = composeNextAppliedTransform(cheapestDerivation, pTrans)
 
-	val aTrans = composeNextAppliedTransform(cheapestDerivation, pTrans)
+            points = points + pTrans.child
+            val reachedByTransform: Set[GSym] = pTrans.child.sentence.foldLeft(Set[GSym]())(
+                    (s, v) => if (ignoreSet.contains(v)) s else s + v
+            )
 
-	points = points + pTrans.child
-	val reachedByTransform: Set[GSym] = pTrans.child.sentence.foldLeft(reached)(
-	  (s, v) => if (ignoreSet.contains(v)) s else s + v
-	)
+            derivedSymbols = reachedByTransform.foldLeft(derivedSymbols)((l, v) => Pair(v, aTrans) :: l)
 
-	reached = reachedByTransform.foldLeft(reached)((s, v) => s + v)
-	derivedSymbols = reachedByTransform.foldLeft(derivedSymbols)((l, v) => Pair(v, aTrans) :: l)
-
-	if (aTrans.level <= query.maxLevelOfTransform) {
-	  forNextStep.enqueue(OrderedAppliedTrans(aTrans))
-	}
-      }
+            if (aTrans.level <= query.maxLevelOfTransform) {
+                forNextStep.enqueue(OrderedAppliedTrans(aTrans))
+            }
+        }
     }
     println("Compose derivation results for " + derivedSymbols.size + "symbols")
     DerivationResult.build(derivedSymbols, query.maxCountOfDerivedSymbols)
