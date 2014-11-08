@@ -70,7 +70,7 @@ object LemmatizerImpl {
 	}
 
 	def tokenize(sentence: String): List[String] = {
-		val t = new StringTokenizer(sentence, "\\t;: .,?!\\'\\\"")
+		val t = new StringTokenizer(sentence, "\t;: .,?!'\"\\")
 		var res: List[String] = List()
 		while(t.hasMoreTokens) {
 			res = res ::: List(t.nextToken())

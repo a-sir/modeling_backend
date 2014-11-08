@@ -35,6 +35,11 @@ class LemmatizerImplTest extends FunSpec {
 			assert(lemmatizer.tokenizeAndLemmatize("apples,; cadabra", keepUnknown) == List("apple"))
 		}
 
+		it("should not break normal words") {
+            var keepUnknown = true
+            val lems = lemmatizer.tokenizeAndLemmatize("batman come home", keepUnknown)
+            assert(lems == List("batman", "come", "home"))
+		}
 	}
 
 }
