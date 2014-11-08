@@ -27,12 +27,12 @@ class Grammar(
 
 
     def getSymbols(tokens: List[String]): List[GSym] = {
-        tokens.foldLeft(List.empty[GSym])((a, b) => {
-            val sym = syms.getSymbol(b)
+        tokens.foldRight(List.empty[GSym])((a, b) => {
+            val sym = syms.getSymbol(a)
             if (sym.isEmpty) {
-                a
+                b
             } else {
-                sym.get :: a
+                sym.get :: b
             }
         })
     }
