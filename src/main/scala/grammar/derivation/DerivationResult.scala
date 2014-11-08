@@ -9,10 +9,10 @@ import play.api.libs.json._
  *          Date: 9/19/13
  */
 
-case class AggrDerivSym(sym: GSym, invCost: Double, chains: List[String]) {
+case class AggrDerivSym(sym: GSym, invCost: Double, srcUsage: Double, chains: List[String]) {
   def toJson: JsObject = {
     Json.obj(
-      "gsym" -> sym.toJson, "invCost" -> invCost, "chains" -> chains
+      "gsym" -> sym.toJson, "invCost" -> invCost, "srcUsage" -> srcUsage, "chains" -> chains
     )
   }
 
@@ -26,23 +26,13 @@ object AggrDerivSym {
     var chs:List[String] = List[String]()
     chains.seq.foreach(a => chs = a.asInstanceOf[JsString].value :: chs)
     AggrDerivSym(
-      sym, obj.\("invCost").as[JsNumber].value.doubleValue(), chs
+      sym, obj.\("invCost").as[JsNumber].value.doubleValue(), obj.\("srcUsage").as[JsNumber].value.doubleValue(), chs
     )
   }
 }
 
 case class DerivationResult(val aggrSyms: Map[GSym, AggrDerivSym]) {
 
-  def asTableString: String = {
-    println("Count of aggregated syms: " + aggrSyms.size)
-    val sb = new StringBuilder()
-//    for (e <- aggrSyms.seq) {
-//      sb.append("\n").append(e._1.getKey()).append("\t")
-//        .append(e._1.name).append("\t").append(e._2._1)
-//      sb
-//    }
-    sb.toString
-  }
   def toJson: JsObject = {
     var list: List[JsObject] = List[JsObject]()
     for (obj <- aggrSyms.values) {
@@ -51,7 +41,7 @@ case class DerivationResult(val aggrSyms: Map[GSym, AggrDerivSym]) {
     Json.obj("syms" -> list)
   }
 
-  override def toString: String = asTableString
+  override def toString: String = "Count of aggregated syms: " + aggrSyms.size
 }
 
 object DerivationResult {
@@ -67,7 +57,7 @@ object DerivationResult {
     DerivationResult(m)
   }
 
-  def build(reached: List[Pair[GSym, AppliedTrans]], limit: Int): DerivationResult = {
+  def build(reached: List[Pair[GSym, AppliedTrans]], query: Query): DerivationResult = {
     var symsWeight: Map[GSym, Double] = Map.empty
     for((sym: GSym, trans: AppliedTrans) <- reached) {      
       val baseWeight: Double = symsWeight.get(sym) match {
@@ -79,15 +69,19 @@ object DerivationResult {
 
     val sortedSyms: List[(GSym, Double)] = symsWeight.toList.sortBy(-1 * _._2)
     var m: Map[GSym, AggrDerivSym] = Map.empty
-    val topSyms: Set[GSym] = sortedSyms.slice(0, Math.min(limit, symsWeight.size)).foldLeft(Set.empty[GSym])((a,b)=> a + b._1)
+    val topSyms: Set[GSym] = sortedSyms.slice(0, Math.min(query.maxCountOfDerivedSymbols, symsWeight.size)).foldLeft(Set.empty[GSym])((a,b)=> a + b._1)
     for (s: GSym <- topSyms) {
         var invCost: Double = 0;
+        var used: Set[Int] = Set()
         var chains: List[String] = List();
         for (t: AppliedTrans <- reached.filter(_._1 == s).map(_._2)) {
             invCost += t.reachedCost
+            for (h <- t.hist) {
+                used = h.sourceUsed.foldLeft(used)((a,b)=> a + b)
+            }            
             chains = t.toString :: chains
         }
-        m += (s -> AggrDerivSym(s, invCost, chains))
+        m += (s -> AggrDerivSym(s, invCost, used.size.toDouble / query.query.size, chains))
     }
     new DerivationResult(m)
   }
