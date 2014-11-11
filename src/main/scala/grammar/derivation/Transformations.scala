@@ -49,7 +49,7 @@ case class AppliedTrans(
 		level: Int, posTrans: PosTrans, root: CPoint, hist: List[History]
 ) {
     
-  override def toString(): String = {
+  def shortDescription(): String = {
     var desc: List[String] = List(posTrans.describe)
     var prev = parent
     while (!prev.isEmpty) {

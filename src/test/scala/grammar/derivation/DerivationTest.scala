@@ -18,6 +18,7 @@ class DerivationTest extends FunSpec {
             val deriv = Derivation.createForStrings
             val reached = deriv.compute(new Query(sentence, grammar, 5, 5, 3))
             assert(!reached.aggrSyms.keys.isEmpty)
+            assert(reached.aggrSyms.values.forall(_.srcUsage == 0.5))
             val reachedLetters = reached.aggrSyms.keys.foldLeft(Set[String]())((s, v) => s + v.name)
             assert(TestUtils.areSame(reachedLetters, Set("b", "d")))
             val reachedSyms = reached.aggrSyms
@@ -63,7 +64,7 @@ class DerivationTest extends FunSpec {
             shouldBe.foreach(x => assert(names.contains(x)))
         }
 
-        ignore("should operate long-running query") {
+        it("should operate long-running query") {
             val grammar = Grammar.createEnglishGrammar()
             val deriv = Derivation.createForDictionary(grammar)
             val querySyms = grammar.getSymbols(grammar.lemmatizer.tokenizeAndLemmatize("house with girls", false))

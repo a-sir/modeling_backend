@@ -76,10 +76,8 @@ object DerivationResult {
         var chains: List[String] = List();
         for (t: AppliedTrans <- reached.filter(_._1 == s).map(_._2)) {
             invCost += t.reachedCost
-            for (h <- t.hist) {
-                used = h.sourceUsed.foldLeft(used)((a,b)=> a + b)
-            }            
-            chains = t.toString :: chains
+            used = t.posTrans.child.sentence.zip(t.hist).filter(_._1 == s).foldLeft(used)((set, b)=> set ++ b._2.sourceUsed)
+            chains = t.shortDescription :: chains
         }
         m += (s -> AggrDerivSym(s, invCost, used.size.toDouble / query.query.size, chains))
     }
