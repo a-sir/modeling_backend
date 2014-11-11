@@ -10,7 +10,7 @@ import cognems.Cognem
  */
 class CognemReaderTest extends FunSpec {
 	describe("A CognemReader") {
-		it("default data-set should contain 1120k cognems before language filtering and 740k after") {
+		ignore("default data-set should contain 1120k cognems before language filtering and 740k after") {
 			val allCognems = CognemReader.defaultSet
 			assert(allCognems.length == 1117697)
 			assert(CognemReader.filterCognemsByChars(allCognems).length == 485079)

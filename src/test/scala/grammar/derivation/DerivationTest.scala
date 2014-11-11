@@ -63,7 +63,7 @@ class DerivationTest extends FunSpec {
             shouldBe.foreach(x => assert(names.contains(x)))
         }
 
-        it("should operate long-running query") {
+        ignore("should operate long-running query") {
             val grammar = Grammar.createEnglishGrammar()
             val deriv = Derivation.createForDictionary(grammar)
             val querySyms = grammar.getSymbols(grammar.lemmatizer.tokenizeAndLemmatize("house with girls", false))

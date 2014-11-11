@@ -12,7 +12,7 @@ import cognems.Cognem
  */
 class GrammarTest extends FunSpec {
     describe("A Grammar") {
-        it("should consist of associative, cognitive rules and synonims") {
+        ignore("should consist of associative, cognitive rules and synonims") {
             val assocNet = AssociativeNet.loadDefaultNet()
             val cognems: List[Cognem] = CognemReader.defaultSet
             val g: Grammar = Grammar.create(assocNet, LemmatizerImpl.create(), cognems)

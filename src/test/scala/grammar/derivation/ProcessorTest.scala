@@ -11,7 +11,7 @@ import grammar.Grammar
 class ProcessorTest extends FunSpec {
 describe("A Processor") {
 
-  it("should derive from apple in English") {
+  ignore("should derive from apple in English") {
     val g = Grammar.createEnglishGrammar()
     println("Grammar loaded")
     val deriv = Derivation.createForDictionary(g)
