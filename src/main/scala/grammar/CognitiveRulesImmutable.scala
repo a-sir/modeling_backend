@@ -8,10 +8,24 @@ import scala.collection.mutable
  */
 class CognitiveRulesImmutable(
 		val contexts: Set[String],
-		val rulesByContext: mutable.MultiMap[String, CognitiveRule],
-		val rulesBySign: mutable.MultiMap[GSym, CognitiveRule],
-		val rulesBySense: mutable.MultiMap[GSym, CognitiveRule],
-		val allCognRules: List[CognitiveRule],
-        val allRules: List[Rule]) {
-	def size = allCognRules.size
+		val rulesByContext: mutable.MultiMap[String, Rule],
+		val rulesBySign: mutable.MultiMap[GSym, Rule],
+		val rulesBySense: mutable.MultiMap[GSym, Rule],
+		val allRules: List[Rule]) {
+	def size = allRules.size
+	
+	def getPossibleRulesFor(sentence: List[GSym]): Option[Set[Rule]] = {
+        var set: Set[Rule] = Set.empty
+        for (s <- sentence) {
+            rulesBySense.get(s) match {
+                case Some(x) => for (xv <- x) { set += xv }
+                case None => println ("Nothing for " + s)
+            }
+        }
+        if (set.isEmpty) { 
+            None
+        } else {
+            Some(set)
+        }
+	}
 }

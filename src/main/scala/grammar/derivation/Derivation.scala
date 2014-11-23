@@ -100,10 +100,9 @@ class Derivation(val suffixAmt: SuffixAmt, val countOfResultsFromOneSentence: In
       // cognitive
       val sentence: List[Integer] = point.sentence.foldRight(List.empty[Integer])((a, b) => a.key :: b)
       suffixAmt.buildTree(sentence.asJava)
-      val posRules = grammar.cognRules.allRules.filter((p: Rule) => point.sentence.contains(p.left))
+      val posRules = grammar.cognRules.allRules.filter((p: Rule) => point.containsAnySymbolFrom(p.left))
       for (r: Rule <- posRules) {
-        val results: java.util.List[AmtResult]
-        = suffixAmt.treeSearch(r, r.leftKeys.asJava, countOfResultsFromOneSentence)
+        val results: java.util.List[AmtResult] = suffixAmt.treeSearch(r, r.leftKeys.asJava, countOfResultsFromOneSentence)
         for (amt: AmtResult <- results.asScala) {
           assert(r == amt.getRule)
           for (pos <- amt.getPos) {

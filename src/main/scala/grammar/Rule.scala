@@ -6,9 +6,9 @@ import utils.Keyable
  * @author A.Sirenko
  *          Date: 9/8/13
  */
-class Rule(val key: Int, val left: List[GSym], val right: List[GSym], val cost: Double) extends Keyable[Integer] {
+class Rule(val key: Int, val left: List[GSym], val right: List[GSym], val cost: Double, val ruleType: String) extends Keyable[Integer] {
 
-  override def toString = "left: " + left + ", right: " + right + "cost: " + cost
+  override def toString = ruleType + " left: " + left + ", right: " + right + "cost: " + cost
   def leftNames (delimeter: String) = left.map(_.name).mkString(delimeter)
   def rightNames(delimeter: String) = right.map(_.name).mkString(delimeter)
   override def getKey: Integer = key
@@ -25,18 +25,18 @@ object Rule {
     }
 
     def createCognitive(left: List[GSym], right: List[GSym]): Rule = {
-        new Rule(Rule.nextKey, left, right, -1)
+        new Rule(Rule.nextKey, left, right, -1, "contextSensitive")
     }
 
     def createWeightedCognitive(left: List[GSym], right: List[GSym], cost: Double): Rule = {
-        new Rule(Rule.nextKey, left, right, cost)
+        new Rule(Rule.nextKey, left, right, cost, "weightedContextSensitive")
     }
 
     def createSyn(left: List[GSym], right: List[GSym]): Rule = {
-        new Rule(Rule.nextKey, left, right, 0)
+        new Rule(Rule.nextKey, left, right, 0, "Syn")
     }
 
     def createAssoc(left: List[GSym], right: List[GSym], cost: Double): Rule = {
-        new Rule(Rule.nextKey, left, right, cost)
+        new Rule(Rule.nextKey, left, right, cost, "Assoc")
     }
 }

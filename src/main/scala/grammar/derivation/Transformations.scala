@@ -11,12 +11,19 @@ import grammar.{GSym, Rule}
 case class CPoint(sentence: List[GSym]) {
   def apply(rule: Rule, offset: Int, replaceSize: Int) = new CPoint(sentence.patch(offset, rule.right, replaceSize))
   def listNames(delimeter: String) = sentence.map(_.name).mkString(delimeter)
+  def containsAnySymbolFrom(list: List[GSym]): Boolean = {
+      for (sym <- sentence) {
+          if (list.contains(sym)) {
+              return true;
+          }
+      }
+      return false;
+    }
 }
 
 case class PosTrans(rule: Rule, offset: Int, child: CPoint) {
   def describe: String = {
-    //(b)-[0.3]->(a b)=>[a b c]
-    "(" + rule.leftNames(" ") + ")-[" + rule.cost + "]->(" + rule.rightNames(" ") + ")=>[" + child.listNames(" ") + "]"
+    "(" + rule.leftNames(" ") + ")-[" + rule + "]->(" + rule.rightNames(" ") + ")=>[" + child.listNames(" ") + "]"
   }
 }
 

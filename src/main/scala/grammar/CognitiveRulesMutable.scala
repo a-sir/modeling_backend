@@ -9,13 +9,13 @@ import scala.collection.mutable
 class CognitiveRulesMutable {
 
 	private var contexts: Set[String] = Set.empty
-	private var rules: List[CognitiveRule] = List()
+	private var rules: List[Rule] = List()
 	private val rulesByContext
-			= new mutable.HashMap[String, mutable.Set[CognitiveRule]] with mutable.MultiMap[String, CognitiveRule]
+			= new mutable.HashMap[String, mutable.Set[Rule]] with mutable.MultiMap[String, Rule]
 	private val rulesBySign
-			= new mutable.HashMap[GSym, mutable.Set[CognitiveRule]] with mutable.MultiMap[GSym, CognitiveRule]
+			= new mutable.HashMap[GSym, mutable.Set[Rule]] with mutable.MultiMap[GSym, Rule]
 	private val rulesBySense
-			= new mutable.HashMap[GSym, mutable.Set[CognitiveRule]] with mutable.MultiMap[GSym, CognitiveRule]
+			= new mutable.HashMap[GSym, mutable.Set[Rule]] with mutable.MultiMap[GSym, Rule]
 
 	def getByContext(context: String) = rulesByContext.get(context)
 
@@ -24,21 +24,21 @@ class CognitiveRulesMutable {
 	def getBySense(sym: GSym) = rulesBySense.get(sym)
 
 	def addRule(rule: CognitiveRule) {
-		contexts = contexts ++ rule.context
+	    val r = Rule.createCognitive(rule.left, rule.right)
+	    contexts = contexts ++ rule.context
 		for (ctx <- rule.context) {
-			rulesByContext.addBinding(ctx, rule)
+			rulesByContext.addBinding(ctx, r)
 		}
 		for (leftSym <- rule.left) {
-			rulesBySense.addBinding(leftSym, rule)
+			rulesBySense.addBinding(leftSym, r)
 		}
 		for (rightSym <- rule.right) {
-			rulesBySign.addBinding(rightSym, rule)
+			rulesBySign.addBinding(rightSym, r)
 		}
-		rules = rule :: rules
+		rules = r :: rules
 	}
 
 	def immutableInstance = new CognitiveRulesImmutable(
-        contexts, rulesByContext, rulesBySign, rulesBySense, rules,
-        rules.foldLeft(List.empty[Rule])((a, b) => Rule.createCognitive(b.left, b.right) :: a)
+        contexts, rulesByContext, rulesBySign, rulesBySense, rules
     )
 }
