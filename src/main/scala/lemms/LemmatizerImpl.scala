@@ -17,27 +17,36 @@ class LemmatizerImpl(val lemmaToWfs: Map[String, List[String]], val wfToLemmas: 
 	@NotNull def getLemmas(@NotNull wordform: String): Option[List[String]] = wfToLemmas.get(wordform)
 
 	@NotNull def getWordforms(@NotNull lemma: String): Option[List[String]] = lemmaToWfs.get(lemma)
-
+		
 	// TODO use for splitting additional set from StringUtils
-	def tokenizeAndLemmatize(sentence: String, keepUnknownWordforms: Boolean): List[String] = {
+	def tokenizeAndLemmatize(sentence: String, keepUnknownWordforms: Boolean, skipStopWords: Boolean): List[String] = {
 		val tokens = LemmatizerImpl.tokenize(sentence)
 		var res: List[String] = List()
-		tokens.foreach((raw:String) => {
-			val lemmas = getLemmas(raw)
+		tokens.foldRight(List.empty[String])((a, b) => {
+		    val s = a.toLowerCase(); if (LemmatizerImpl.stopList.contains(s)) {b} else {s :: b}
+		}).foreach((raw:String) => {
+		    
+		    val rawLow = raw.toLowerCase();
+			val lemmas = getLemmas(rawLow)
 			if (lemmas.isEmpty) {
 				if (keepUnknownWordforms) {
-					res = res ::: List(raw)
+					res = res ::: List(rawLow)
 				}
 			} else if (lemmas.get.length == 1) {
 				res = res ::: List(lemmas.get(0))
 			}
 		})
+		
 		res
 	}
 
 }
 
 object LemmatizerImpl {
+    
+    val stopList: Set[String] = Set(
+        "of", "a", "the", "or", "in", "to", "and", "the", "that", "an", "is", "for", "by", "with", "as",
+        "which", "from", "who", "used", "on", "being", "at", "be", "are", "such", "has", "it", "made")
 
 	def create() = {
 

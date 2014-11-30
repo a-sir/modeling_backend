@@ -43,13 +43,14 @@ object Grammar {
     def createEnglishGrammar(): Grammar = {
         create(AssociativeNet.loadDefaultNet(), LemmatizerImpl.create(), CognemReader.defaultSet)
     }
+    
 
     def create(assoc: AssociativeNet, lemmatizer: LemmatizerImpl, cognems: List[Cognem]): Grammar = {
         val syms = new SymbolsMutable
         val rules = new RulesMutable
 
         val keepUnknownWordforms = true
-
+        val skipStopWords = true;
         // Assume assoc
         for (stim: String <- assoc.getStims.asScala.toIterable) {
             var total = 0
@@ -59,12 +60,12 @@ object Grammar {
             }
 
             val lemStimSymbols = syms.getOrCreateSymbols(
-                lemmatizer.tokenizeAndLemmatize(stim, keepUnknownWordforms)
+                lemmatizer.tokenizeAndLemmatize(stim, keepUnknownWordforms, skipStopWords)
             )
             if (!lemStimSymbols.isEmpty) {
                 for (conn: Connection <- conns) {
                     val lemReakSymbols = syms.getOrCreateSymbols(
-                        lemmatizer.tokenizeAndLemmatize(conn.getReak, keepUnknownWordforms)
+                        lemmatizer.tokenizeAndLemmatize(conn.getReak, keepUnknownWordforms, skipStopWords)
                     )
                     if (!lemReakSymbols.isEmpty) {
                         val count = conn.getCount
@@ -77,9 +78,11 @@ object Grammar {
 
         val cognRules = new CognitiveRulesMutable
         for (cogn <- CognemReader.filterCognemsByChars(cognems)) {
-            val left = syms.getOrCreateSymbols(lemmatizer.tokenizeAndLemmatize(cogn.name, keepUnknownWordforms))
-            val right = syms.getOrCreateSymbols(lemmatizer.tokenizeAndLemmatize(cogn.sense, keepUnknownWordforms))
-            cognRules.addRule(new CognitiveRule(left, right, util.Collections.toList(cogn.context)))
+            val left = syms.getOrCreateSymbols(lemmatizer.tokenizeAndLemmatize(cogn.name, keepUnknownWordforms, skipStopWords))
+            val right = syms.getOrCreateSymbols(lemmatizer.tokenizeAndLemmatize(cogn.sense, keepUnknownWordforms, skipStopWords))
+            if (!left.isEmpty && !right.isEmpty) {
+                cognRules.addRule(new CognitiveRule(left, right, util.Collections.toList(cogn.context)))
+            }
         }
 
         // synsets

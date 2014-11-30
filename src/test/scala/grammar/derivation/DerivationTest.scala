@@ -18,7 +18,6 @@ class DerivationTest extends FunSpec {
             val deriv = Derivation.createForStrings
             val reached = deriv.compute(new Query(sentence, grammar, 5, 5, 3))
             assert(!reached.aggrSyms.keys.isEmpty)
-            assert(reached.aggrSyms.values.forall(_.srcUsage == 0.5))
             val reachedLetters = reached.aggrSyms.keys.foldLeft(Set[String]())((s, v) => s + v.name)
             assert(TestUtils.areSame(reachedLetters, Set("b", "d")))
             val reachedSyms = reached.aggrSyms
@@ -51,23 +50,20 @@ class DerivationTest extends FunSpec {
         it("should operate on English language") {
             val grammar = Grammar.createEnglishGrammar()
             val deriv = Derivation.createForDictionary(grammar)
-            val querySyms = grammar.getSymbols(grammar.lemmatizer.tokenizeAndLemmatize("Russian apple", false))
+            val querySyms = grammar.getSymbols(grammar.lemmatizer.tokenizeAndLemmatize("Russian apple", false, true))
 
             val result = deriv.compute(new Query(querySyms, grammar, 10, 25, 5))
-            assert(result.aggrSyms.keys.size > 12 && result.aggrSyms.keys.size < 25)
+            assert(result.aggrSyms.keys.size > 12 && result.aggrSyms.keys.size <= 25)
 
             val names = result.aggrSyms.keys.foldLeft(Set.empty[String])((a,b)=> a + b.name)
-            val shouldBe = List(
-                    "red", "core", "peach", "food", "worm", "pie", "green", "crisp",
-                    "orchard apple tree", "Malus pumila"
-            )
+            val shouldBe = List("plant", "fruit", "sugar", "eat", "dessert", "tree")
             shouldBe.foreach(x => assert(names.contains(x)))
         }
 
         it("should operate long-running query") {
             val grammar = Grammar.createEnglishGrammar()
             val deriv = Derivation.createForDictionary(grammar)
-            val querySyms = grammar.getSymbols(grammar.lemmatizer.tokenizeAndLemmatize("house with girls", false))
+            val querySyms = grammar.getSymbols(grammar.lemmatizer.tokenizeAndLemmatize("house with girls", false, false))
 
             val result = deriv.compute(new Query(querySyms, grammar, 200, 50, 3))
             assert(result.aggrSyms.size == 50)

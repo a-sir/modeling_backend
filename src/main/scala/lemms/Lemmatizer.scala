@@ -12,6 +12,6 @@ trait Lemmatizer {
 
     @NotNull def getWordforms(@NotNull lemma: String): Option[List[String]]
 
-    def tokenizeAndLemmatize(sentence: String, keepUnknownWordforms: Boolean): List[String]
+    def tokenizeAndLemmatize(sentence: String, keepUnknownWordforms: Boolean, skipStopWords: Boolean): List[String]
 
 }

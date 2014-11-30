@@ -13,6 +13,7 @@ class LemmatizerSameImpl extends Lemmatizer {
     @NotNull
     override def getWordforms(lemma: String): Option[List[String]] = new Some[List[String]](List(lemma))
 
-    override def tokenizeAndLemmatize(sentence: String, keepUnknownWordforms: Boolean): List[String] =
-        sentence.split(' ').toList
+    override def tokenizeAndLemmatize(
+            sentence: String, keepUnknownWordforms: Boolean, skipStopWords: Boolean)
+    : List[String] = sentence.split(' ').toList
 }
