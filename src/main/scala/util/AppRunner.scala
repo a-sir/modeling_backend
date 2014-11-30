@@ -50,15 +50,12 @@ object AppRunner extends App {
       case None => println("[" + res.sessionId + ":" + res.query + "] was removed from tasks already. Ignore results")
       case opt: Some[JsObject] =>
         val o = opt.get
-        println("For sessionId " + res.sessionId + " there was an entry: " + o + "serialize " + res.result.aggrSyms.size + " reached symbols")
         val derivSerialized = java.net.URLEncoder.encode(res.result.toJson.toString, "UTF-8")
-        println("Serialized to String:\n" + derivSerialized)
         tasks += res.sessionId -> (
           o - "state" +
             ("derivation_result" -> JsString(derivSerialized)) +
             ("state" -> JsString("derived"))
         )
-        println("Tasks after getting processing results:" + AppRunner.tasks)
         sendStatusUpdate(res.sessionId)
     }
   }
